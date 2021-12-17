@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  Copyright (c) 2021 Valve
+#
+#  Configuration settings for SteamOS kdump. After _any_ change in this
+#  file, it's required to create the kdump minimal initramfs by running:
+#  /usr/lib/kdump/kdump_load.sh initrd
+#
+
+# Mount-related options - the DEVNODE must exist and be available during the kdump
+# script execution. The KDUMP_FOLDER will be create if doesn't exist.
+
+MOUNT_DEVNODE="nvme0n1p8"
+KDUMP_FOLDER="/.steamos/offload/var/kdump"
+
+# Dump controlling settings - for now we don't have network/iscsi dumps, only
+# local storage dumps. If FULL_COREDUMP is !=0, we collect a full compressed
+# vmcore, which might require a lot of disk space. The *_CMD settings refer
+# to tunnings on makedumpfile - we rely on zstd compression and maximum page
+# exclusion for the full vmcore, mimic'ing Debian kdump.
+
+FULL_COREDUMP=0
+MAKEDUMPFILE_COREDUMP_CMD="-z -d 31"
+MAKEDUMPFILE_DMESG_CMD="--dump-dmesg"

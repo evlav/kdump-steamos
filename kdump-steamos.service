@@ -1,0 +1,17 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  Copyright (c) 2021 Valve.
+#
+
+[Unit]
+Description=SteamOS kdump loader boot-time service
+
+[Service]
+Type=oneshot
+StandardOutput=journal
+ExecStartPre=/usr/lib/kdump/kdump_load.sh
+ExecStart=/usr/lib/kdump/submit_report.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
