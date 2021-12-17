@@ -1,3 +1,4 @@
+```
 #  SPDX-License-Identifier: LGPL-2.1+
 #
 #  Copyright (c) 2021 Valve.
@@ -68,3 +69,4 @@
 #  specified kernel, not only for the running one (which is what we do now).
 #  Low-priority idea, easy to implement.
 #
+```
