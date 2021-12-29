@@ -4,7 +4,7 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 
 pkgname=kdump-steamos
-pkgver=0.1
+pkgver=0.2
 pkgrel=1
 pkgdesc="Kdump scripts to collect vmcore/dmesg in a small dracut-based initramfs"
 depends=('dracut' 'kexec-tools' 'systemd' 'zstd')
@@ -22,15 +22,15 @@ source=('kdump_collect.sh'
         'README.md'
         'submit_report.sh')
 
-sha256sums=('b008f0afa1ca0eccbb27d5293fc624c6845eb89d1b6a92141b096d9746afb672'
-            'c18621fb705decfff724b7498d418002cdf9c30c2c1a00d5379a51fdb4c21a26'
-            'feef3082832df97e5a21ee90a94874b7776fceaa4bb9847ae57344db8aab73ef'
-            '8f2fb837c980975dfd3bb2c7c2dd66b20975f97fdecd2646e06543a869be6136'
+sha256sums=('38a3636c95cb97b33a71cfb2b95ccbf7a9a565e86b2128299ea7844d1135fe07'
+            '38751d1fa1607fc99607423a0051a2b3322db5579906401b40c11c10edd6bbc6'
+            '888024a0b121102688d0384cf00dca06d55d3c2fc6b18a3de0da1fc8b5c10066'
+            '06b38bd9f09da5fb22a765b6f1945fc349cc5f9d13cd32c9218b9b60b40a9010'
             '6063ed2283743d8d84a89d9f3c950e5f50adf99bba5ce865a25282081ebc04c2'
             '86ef2bd71551598f392fe278507449c1c872e0d42b27600cfeb5bcf9a75aa881'
-            'eaff70fd08c2378894bc0c7c340fb41cef6bc488a839d81ea7d0f06f4998e14e'
-            'e4da9aa28643aee08f126f0fd62e273924e511daefbc8c2957ba34715b718b95'
-            '98fd860864cfb59043532dd6b4dfea0e6cf2abbd77da5d9b3200da718126a480')
+            'c3ceaf77021e49c3ec884e3959f49b0cbf5e8e89ad3f17d485d895d9e91725f4'
+            '01432491df80dfd37c6f261c17f55c574e8898003642334a4d61f8d93aef08c3'
+            '956efe1589d8d6533a231d8bdec6ac5cd4c1d1494b1f44b8494fe1d75f6a1e4e')
 
 package() {
 	install -D -m0644 kdump.etc "$pkgdir/etc/default/kdump"

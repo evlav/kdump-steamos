@@ -4,11 +4,15 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 
 post_install() {
-	# Create the minimal kdump initramfs for the running kernel
+	#  Create the minimal kdump initramfs for the running kernel
 	/usr/lib/kdump/kdump_load.sh initrd
+
+	systemctl enable kdump-steamos.service
 }
 
 pre_remove() {
-	# Delete all minimal initramfs images created for kdump
+	systemctl disable kdump-steamos.service
+
+	#  Delete all minimal initramfs images created for kdump
 	/usr/lib/kdump/kdump_load.sh clear
 }

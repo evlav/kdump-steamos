@@ -8,7 +8,7 @@
 #  Dracut-based initramfs.
 #
 
-# Only include kdump if it is explicitly asked in the argument list
+#  Only include kdump if it is explicitly asked in the argument list
 check() {
     return 255
 }
@@ -18,14 +18,14 @@ installkernel() {
 }
 
 install() {
-    # First clear all unnecessary firmwares/drivers added by drm in order to
-    # reduce the size of this minimal initramfs being created. This should
-    # be already done via command-line arguments, but let's play safe and delete
-    # from here as well just in case.
+    #  First clear all unnecessary firmwares/drivers added by drm in order to
+    #  reduce the size of this minimal initramfs being created. This should
+    #  be already done via command-line arguments, but let's play safe and delete
+    #  from here as well just in case.
     rm -rf $initdir/usr/lib/firmware/amdgpu/
     rm -rf $initdir/usr/lib/modules/*/kernel/drivers/gpu/drm/amd/*
 
-    # Install necessary binaries
+    #  Install necessary binaries
     inst date
     inst sync
 
