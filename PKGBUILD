@@ -4,10 +4,10 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 
 pkgname=kdump-steamos
-pkgver=0.2
+pkgver=0.3
 pkgrel=1
 pkgdesc="Kdump scripts to collect vmcore/dmesg in a small dracut-based initramfs"
-depends=('dracut' 'kexec-tools' 'systemd' 'zstd')
+depends=('dmidecode' 'dracut' 'kexec-tools' 'makedumpfile' 'systemd' 'zstd')
 arch=('x86_64')
 license=('GPL2')
 install=kdump-steamos.install
@@ -17,20 +17,20 @@ source=('kdump_collect.sh'
         'kdump_load.sh'
         'kdump-steamos.install'
         'kdump-steamos.service'
-        'makedumpfile'
         'module-setup.sh'
         'README.md'
-        'submit_report.sh')
+        'submit_report.sh'
+        'submitter_load.sh')
 
-sha256sums=('38a3636c95cb97b33a71cfb2b95ccbf7a9a565e86b2128299ea7844d1135fe07'
-            '38751d1fa1607fc99607423a0051a2b3322db5579906401b40c11c10edd6bbc6'
-            '888024a0b121102688d0384cf00dca06d55d3c2fc6b18a3de0da1fc8b5c10066'
+sha256sums=('2514f79a496f76af847e262eadd55a5c2f8d95375cc513efa8cadd4cd98fe1d2'
+            'd0ac5e7e38fa1d3355eacdf70188483456f53d3e2b18cd161dea3df87b0b8f9c'
+            '8a556a9ebbda88dfd29b9620a0f2e7dbea19cd5fc019eb5dc4ebf7c80e4bf238'
             '06b38bd9f09da5fb22a765b6f1945fc349cc5f9d13cd32c9218b9b60b40a9010'
-            '6063ed2283743d8d84a89d9f3c950e5f50adf99bba5ce865a25282081ebc04c2'
-            '86ef2bd71551598f392fe278507449c1c872e0d42b27600cfeb5bcf9a75aa881'
-            'c3ceaf77021e49c3ec884e3959f49b0cbf5e8e89ad3f17d485d895d9e91725f4'
-            '01432491df80dfd37c6f261c17f55c574e8898003642334a4d61f8d93aef08c3'
-            '956efe1589d8d6533a231d8bdec6ac5cd4c1d1494b1f44b8494fe1d75f6a1e4e')
+            '12a9124b907f208471ba7aaac0f3261cbbd34a168cce3260fa9e7793994beebd'
+            '26bc2b64af0d468f050c0e0dd9e2053176d56886edad9146bc495797bf2c5810'
+            'b87fb8e4c4602f8ddc3b0bf6d6175d0ee7b9e0942f4dca8f1b958ed3ad445470'
+            'd8b432dc1602e330e61c91a8f9e6761273ff2ca8129f457828ff0d20ac6d5b25'
+            'cbb207ecc0f6bacefbeed41f0d4910daac6500ac2345366e1f95f09a7653c65a')
 
 package() {
 	install -D -m0644 kdump.etc "$pkgdir/etc/default/kdump"
@@ -42,6 +42,6 @@ package() {
 	install -D -m0644 README.md "$pkgdir/usr/lib/dracut/modules.d/55kdump/README"
 
 	install -D -m0755 kdump_load.sh "$pkgdir/usr/lib/kdump/kdump_load.sh"
-	install -D -m0755 makedumpfile "$pkgdir/usr/lib/kdump/makedumpfile"
 	install -D -m0755 submit_report.sh "$pkgdir/usr/lib/kdump/submit_report.sh"
+	install -D -m0755 submitter_load.sh "$pkgdir/usr/lib/kdump/submitter_load.sh"
 }

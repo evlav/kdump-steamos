@@ -14,7 +14,7 @@
 . /usr/lib/kdump/kdump.etc
 
 VMCORE="/proc/vmcore"
-KDUMP_TIMESTAMP=$(date +"%Y%m%d%H%M")
+KDUMP_TIMESTAMP=$(date -u +"%Y%m%d%H%M")
 KDUMP_FOLDER="/kdump_path/${KDUMP_FOLDER}/crash/${KDUMP_TIMESTAMP}"
 
 #  Bail out in case we don't have a vmcore, i.e. either we're not kdumping
@@ -31,11 +31,11 @@ fi
 
 mkdir -p "${KDUMP_FOLDER}"
 
-/usr/lib/kdump/makedumpfile ${MAKEDUMPFILE_DMESG_CMD} $VMCORE "${KDUMP_FOLDER}/dmesg.txt"
+/usr/bin/makedumpfile ${MAKEDUMPFILE_DMESG_CMD} $VMCORE "${KDUMP_FOLDER}/dmesg.txt"
 sync "${KDUMP_FOLDER}/dmesg.txt"
 
-if [ ${FULL_COREDUMP} -ne 0 ]; then
-	/usr/lib/kdump/makedumpfile ${MAKEDUMPFILE_COREDUMP_CMD} $VMCORE "${KDUMP_FOLDER}/vmcore.compressed"
+if [ "${FULL_COREDUMP}" -ne 0 ]; then
+	/usr/bin/makedumpfile ${MAKEDUMPFILE_COREDUMP_CMD} $VMCORE "${KDUMP_FOLDER}/vmcore.compressed"
 	sync "${KDUMP_FOLDER}/vmcore.compressed"
 fi
 

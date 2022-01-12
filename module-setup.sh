@@ -28,6 +28,7 @@ install() {
     #  Install necessary binaries
     inst date
     inst sync
+    inst makedumpfile
 
     mkdir -p $initdir/usr/lib/kdump
     cp -LR --preserve=all /usr/lib/kdump/* $initdir/usr/lib/kdump/

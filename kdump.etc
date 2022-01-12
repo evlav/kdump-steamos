@@ -33,3 +33,8 @@ MAKEDUMPFILE_DMESG_CMD="--dump-dmesg"
 #  relies in having an available RAM buffer on /proc/iomem with at least 5MiB
 #  in size.
 USE_PSTORE_RAM=1
+
+#  This is a log submission setting, based on Steam config files, and
+#  *should not* be changed, or else the log sending mechanism will be
+#  impaired.
+LOGINVDF="/home/doorstop/.local/share/Steam/config/loginusers.vdf"

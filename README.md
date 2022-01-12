@@ -15,7 +15,8 @@
 #  collection, that only grabs dmesg, and a more complete setting to grab the
 #  whole (compressed) vmcore. The tunnings are available at /etc/default/kdump.
 #
-#  Also, the infrastructure is able to configure and save pstore-RAM logs.
+#  Also, the infrastructure is able to configure and save pstore-RAM logs;
+#  this is the default option.
 #
 #  After installation and a reboot, things should be all set EXCEPT for GRUB
 #  config - please check the CAVEATS/INSTRUCTIONS section below. Notice the
@@ -27,17 +28,17 @@
 #  CAVEATS / INSTRUCTIONS
 #  ###########################################################################
 #  (a) For now, we  don't automatically edit any GRUB config, so the minimum
-#  necessary action after installing this package is to add "crashkernel=160M"
+#  necessary action after installing this package is to add "crashkernel=192M"
 #  to your GRUB config in order subsequent boots pick this setting and do reserve
 #  the memory, or else kdump cannot work. The memory amount was empirically
-#  determined - 128M wasn't enough and 144M is unstable, so 160M seems good enough.
+#  determined - 144M wasn't enough and 160M is unstable, so 192M seems good enough.
 #  If you prefer to rely on pstore-RAM, no GRUB setting should be required; this
 #  is currently the default (see /etc/default/kdump).
 #
 #  (b) It requires (obviously) a RW rootfs - we've used tune2fs in order to make
 #  it read-write, since it's RO by default. Also, we assume the nvme partition
 #  scheme is default across all versions and didn't change with new updates
-#  for example - kdump relies in mounting partitions, etc.
+#  for example - both kdump and pstore relies in mounting partitions, etc.
 #
 #  (c) Due to a post-transaction hook executed by libalpm (90-dracut-install.hook),
 #  unfortunately after installing the kdump-steamos package *all* initramfs images
@@ -45,9 +46,9 @@
 #  but for now be prepared: the installation take some (long) minutes due to that ={
 #
 #  (d) Unfortunately makedumpfile from Arch Linux is not available on official
-#  repos, only in AUR. So, we're hereby _packing the binary_ with all the scripts,
-#  which is a temporary workaround and should be resolved later - already started
-#  to "lobby" for package inclusion in the official channels:
+#  repos, only in AUR. But it is available on Holo, so we make use of that.
+#  Also, a discussion was started to get it included on official repos:
+#  https://lists.archlinux.org/pipermail/aur-general/2022-January/036767.html
 #  https://aur.archlinux.org/packages/makedumpfile/#comment-843853
 #
 #
@@ -68,13 +69,16 @@
 #  in the past and relying in sysrq reboot as a quirk managed to be a safe option,
 #  so this is something to think about here. Should be easy to implement.
 #
-#  (5) Maybe a good idea would be to allow creating the minimum image for any
-#  specified kernel, not only for the running one (which is what we do now).
-#  Low-priority idea, easy to implement.
+#  (5) The log submission mechanism is incomplete - we save the logs as tar.zst
+#  files, but they are not submitted to any remote server, etc.
 #
 #  (6) Pstore ramoops backend has some limitations that we're discussing with
 #  the kernel community - right now we can only collect ONE dmesg and its
 #  size is truncated on "record_size" bytes, not allowing a file split like
 #  efi-pstore; hopefully we can improve that.
+#
+#  (7) Maybe a good idea would be to allow creating the minimum image for any
+#  specified kernel, not only for the running one (which is what we do now).
+#  Low-priority idea, easy to implement.
 #
 ```

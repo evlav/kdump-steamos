@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  SPDX-License-Identifier: LGPL-2.1+
 #
@@ -21,22 +21,22 @@ fi
 DEVN_MOUNTED=$(mount |grep "${MOUNT_DEVNODE}" | head -n1 | cut -f3 -d\ )
 KDUMP_FOLDER="${DEVN_MOUNTED}/${KDUMP_FOLDER}"
 
-echo "${KDUMP_FOLDER}" > ${KDUMP_MNT}
-sync ${KDUMP_MNT}
+echo "${KDUMP_FOLDER}" > "${KDUMP_MNT}"
+sync "${KDUMP_MNT}"
 
-if [ "$1" == "initrd" ]; then
+if [ "$1" = "initrd" ]; then
 	mkdir -p "${KDUMP_FOLDER}"
 	rm -f "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
 
 	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
 	dracut --no-early-microcode --host-only -q -m\
 	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
-	--kver $(uname -r) "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+	--kver "$(uname -r)" "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
 
 	exit 0
 fi
 
-if [ "$1" == "clear" ]; then
+if [ "$1" = "clear" ]; then
 	rm -f ${KDUMP_FOLDER}/kdump-initrd-*
 	exit 0
 fi
@@ -46,24 +46,29 @@ fi
 #  here a 5MiB memory region.
 #  Notice that we assume ramoops is a module here - if built-in, we should
 #  properly load it through command-line parameters.
-if [ ${USE_PSTORE_RAM} -eq 1 ]; then
+if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 	MEM_REQUIRED=5242880  # 5MiB
 	RECORD_SIZE=0x200000  # 2MiB
 	RANGE=$(grep "RAM buffer" /proc/iomem | head -n1 | cut -f1 -d\ )
 
-	MEM_END=$(echo $RANGE | cut -f2 -d\-)
-	MEM_START=$(echo $RANGE | cut -f1 -d\-)
+	MEM_END=$(echo "$RANGE" | cut -f2 -d\-)
+	MEM_START=$(echo "$RANGE" | cut -f1 -d\-)
 	MEM_SIZE=$(( 16#${MEM_END} - 16#${MEM_START} ))
 
 	if [ ${MEM_SIZE} -ge ${MEM_REQUIRED} ]; then
 		if modprobe ramoops mem_address=0x${MEM_START} mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
 		       exit 0
 		fi
+		logger "pstore-RAM load was attempted and failed...will try kdump"
 	fi
 		#  Fallbacks to kdump load - if we fail when configuring pstore, better try kdump;
 		#  who knows and we may be lucky enough to have some crashkernel reserved memory...
 		#  TODO (maybe): could invert the order and try kdump first, if it fails, try pstore!
 fi
+
+#  TODO: insert code here to validate that crashkernel is configured and
+#  memory is reserved; if not, set it on grub.cfg and recreate the EFI grub
+#  config file, warning users that in the current boot kdump is not set.
 
 #  Stolen from Debian kdump
 KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/\\\\"/' /proc/cmdline)
@@ -71,4 +76,7 @@ KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/
 KDUMP_CMDLINE="${KDUMP_CMDLINE} panic=-1 oops=panic fsck.mode=force fsck.repair=yes nr_cpus=1 reset_devices"
 VMLINUX="$(grep -o 'BOOT_IMAGE=[^ ]*' /proc/cmdline)"
 
-kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img" --append="${KDUMP_CMDLINE}" || true
+if ! kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img" --append="${KDUMP_CMDLINE}"; then
+	logger "kdump load was attempted and failed"
+	exit 0
+fi
