@@ -7,7 +7,7 @@ pkgname=kdump-steamos
 pkgver=0.3
 pkgrel=1
 pkgdesc="Kdump scripts to collect vmcore/dmesg in a small dracut-based initramfs"
-depends=('dmidecode' 'dracut' 'kexec-tools' 'makedumpfile' 'systemd' 'zstd')
+depends=('dmidecode' 'dracut' 'kexec-tools' 'makedumpfile' 'systemd' 'zip' 'zstd')
 arch=('x86_64')
 license=('GPL2')
 install=kdump-steamos.install
@@ -31,7 +31,7 @@ sha256sums=('dbedff54addfb5dce51614c73df04c90fca9f27d0d3a690243259ccbbfcca07c'
             '12a9124b907f208471ba7aaac0f3261cbbd34a168cce3260fa9e7793994beebd'
             '26bc2b64af0d468f050c0e0dd9e2053176d56886edad9146bc495797bf2c5810'
             'b87fb8e4c4602f8ddc3b0bf6d6175d0ee7b9e0942f4dca8f1b958ed3ad445470'
-            'd8b432dc1602e330e61c91a8f9e6761273ff2ca8129f457828ff0d20ac6d5b25'
+            '8f974b51f6fcf5ec4ae8bb9d585390d4354cf8d99ae98e0efe9484f08abb1949'
             'cbb207ecc0f6bacefbeed41f0d4910daac6500ac2345366e1f95f09a7653c65a')
 
 package() {

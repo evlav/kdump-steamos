@@ -57,6 +57,9 @@ if [ "${PSTORE_CNT}" -ne 0 ]; then
 	done
 	LOGS_FOUND=${LOOP_CNT}
 
+	#  Logs should live on logs/ folder (no subfolders), due to the zip file
+	mv ${PSTORE_FOLDER}/* "${KDUMP_LOGS_FOLDER}/" 2>/dev/null
+
 #  Enter the else block in case we don't have pstore logs - maybe we
 #  have kdump logs then.
 else
@@ -94,6 +97,9 @@ else
 
 		done
 		LOGS_FOUND=$((LOGS_FOUND + LOOP_CNT))
+
+		#  Logs should live on logs/ folder (no subfolders), due to the zip file
+		mv ${KD_FOLDER}/* "${KDUMP_LOGS_FOLDER}/" 2>/dev/null
 	fi
 
 fi
@@ -135,14 +141,13 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 	uname -r > "${KDUMP_LOGS_FOLDER}/version.${CURRENT_TSTAMP}"
 
 	#  Create the dump compressed pack.
-	LOG_FNAME="steamos-${SN}-${STEAM_ACCOUNT}.${CURRENT_TSTAMP}.tar"
+	LOG_FNAME="steamos-${SN}-${STEAM_ACCOUNT}.${CURRENT_TSTAMP}.zip"
 	LOG_FNAME="${KDUMP_MAIN_FOLDER}/${LOG_FNAME}"
-	tar cf "${LOG_FNAME}" "${KDUMP_LOGS_FOLDER}" 1>/dev/null 2>&1
 
-	zstd < "${LOG_FNAME}" > "${LOG_FNAME}.zst"
-	sync "${LOG_FNAME}.zst"
-	rm -rf  "${KDUMP_LOGS_FOLDER}" "${LOG_FNAME}"
+	zip -9 -jq "${LOG_FNAME}" ${KDUMP_LOGS_FOLDER}/* 1>/dev/null 2>&1
+	sync "${LOG_FNAME}"
+	rm -rf  "${KDUMP_LOGS_FOLDER}"
 
-	#  TODO: implement a log submission mechanism, in order to send the zstd file
+	#  TODO: implement a log submission mechanism, in order to send the zip file
 	#  to Valve servers through an API.
 fi
