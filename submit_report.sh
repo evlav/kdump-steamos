@@ -128,6 +128,13 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 		done
 	fi
 
+	#  Here we collect some more info, like DMI data, os-release, etc;
+	#  ToDo: Add Steam application / Proton / Games logs collection...
+	dmidecode > "${KDUMP_LOGS_FOLDER}/dmidecode.${CURRENT_TSTAMP}"
+	grep "BUILD_ID" "/etc/os-release" | cut -f2 -d\= > "${KDUMP_LOGS_FOLDER}/build.${CURRENT_TSTAMP}"
+	uname -r > "${KDUMP_LOGS_FOLDER}/version.${CURRENT_TSTAMP}"
+
+	#  Create the dump compressed pack.
 	LOG_FNAME="steamos-${SN}-${STEAM_ACCOUNT}.${CURRENT_TSTAMP}.tar"
 	LOG_FNAME="${KDUMP_MAIN_FOLDER}/${LOG_FNAME}"
 	tar cf "${LOG_FNAME}" "${KDUMP_LOGS_FOLDER}" 1>/dev/null 2>&1
