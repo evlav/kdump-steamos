@@ -129,8 +129,6 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 
 			STEAM_ACCOUNT=$(awk -v n=${IDX} -v RS='}' 'NR==n{gsub(/.*\{\n|\n$/,""); print}' "${LOGINVDF}" | grep "AccountName" | cut -f4 -d\")
 			break
-
-			IDX=$((IDX + 1))
 		done
 	fi
 
