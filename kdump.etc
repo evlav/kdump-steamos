@@ -34,7 +34,8 @@ MAKEDUMPFILE_DMESG_CMD="--dump-dmesg"
 #  in size.
 USE_PSTORE_RAM=1
 
-#  This is a log submission setting, based on Steam config files, and
-#  *should not* be changed, or else the log sending mechanism will be
-#  impaired.
+#  Below some log submission settings, based on Steam config files and Valve
+#  URLs. These settings *should not* be changed, or else the log sending
+#  mechanism will be impaired.
 LOGINVDF="/home/doorstop/.local/share/Steam/config/loginusers.vdf"
+POST_URL="https://api.steampowered.com/ICrashReportService/ACTIONCrashUpload/v1"
