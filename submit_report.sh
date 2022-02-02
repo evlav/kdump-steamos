@@ -58,13 +58,13 @@ if [ "${PSTORE_CNT}" -ne 0 ]; then
 	LOGS_FOUND=${LOOP_CNT}
 
 	#  Logs should live on logs/ folder (no subfolders), due to the zip file
-	mv ${PSTORE_FOLDER}/* "${KDUMP_LOGS_FOLDER}/" 2>/dev/null
+	mv "${PSTORE_FOLDER}"/* "${KDUMP_LOGS_FOLDER}/" 2>/dev/null
 
 #  Enter the else block in case we don't have pstore logs - maybe we
 #  have kdump logs then.
 else
 	KDUMP_CRASH_FOLDER="${KDUMP_MAIN_FOLDER}/crash"
-	KDUMP_CNT=$(find ${KDUMP_CRASH_FOLDER}/* -type d 2>/dev/null | wc -l)
+	KDUMP_CNT=$(find "${KDUMP_CRASH_FOLDER}"/* -type d 2>/dev/null | wc -l)
 
 	if [ "${KDUMP_CNT}" -ne 0 ]; then
 		#  Dump the kdump logs in the <...>/kdump/logs/kdump subfolder.
@@ -73,7 +73,7 @@ else
 
 		LOOP_CNT=0
 		while [ "${KDUMP_CNT}" -gt 0 ]; do
-			CRASH_CURRENT=$(find ${KDUMP_CRASH_FOLDER}/* -type d 2>/dev/null | head -n1)
+			CRASH_CURRENT=$(find "${KDUMP_CRASH_FOLDER}"/* -type d 2>/dev/null | head -n1)
 			CRASH_TSTAMP=$(basename "${CRASH_CURRENT}")
 
 			if [ -s "${CRASH_CURRENT}/dmesg.txt" ]; then
@@ -99,7 +99,7 @@ else
 		LOGS_FOUND=$((LOGS_FOUND + LOOP_CNT))
 
 		#  Logs should live on logs/ folder (no subfolders), due to the zip file
-		mv ${KD_FOLDER}/* "${KDUMP_LOGS_FOLDER}/" 2>/dev/null
+		mv "${KD_FOLDER}"/* "${KDUMP_LOGS_FOLDER}/" 2>/dev/null
 	fi
 
 fi
