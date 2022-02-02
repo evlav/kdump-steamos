@@ -14,7 +14,7 @@
 #  We do some validation to be sure KDUMP_MNT pointed path is valid...
 #  That and having a valid /etc/default/kdump are essential conditions.
 if [ ! -f "/etc/default/kdump" ]; then
-	logger "/etc/default/kdump not present - aborting..." || true
+	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
 	exit 0
 fi
 
@@ -24,7 +24,7 @@ KDUMP_MAIN_FOLDER="$(cat "${KDUMP_MNT}")"
 rm -f "${KDUMP_MNT}"
 
 if [ ! -d "${KDUMP_MAIN_FOLDER}" ]; then
-	logger "invalid folder: ${KDUMP_MAIN_FOLDER} - aborting..." || true
+	logger "kdump-steamos: invalid folder (${KDUMP_MAIN_FOLDER}) - aborting..."
 	exit 0
 fi
 
