@@ -12,6 +12,7 @@
 #
 
 if [ ! -f "/etc/default/kdump" ]; then
+	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
 	exit 0
 fi
 
@@ -37,7 +38,7 @@ if [ "$1" = "initrd" ]; then
 fi
 
 if [ "$1" = "clear" ]; then
-	rm -f ${KDUMP_FOLDER}/kdump-initrd-*
+	rm -f "${KDUMP_FOLDER}"/kdump-initrd-*
 	exit 0
 fi
 
@@ -51,19 +52,19 @@ if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 	RECORD_SIZE=0x200000  # 2MiB
 	RANGE=$(grep "RAM buffer" /proc/iomem | head -n1 | cut -f1 -d\ )
 
-	MEM_END=$(echo "$RANGE" | cut -f2 -d\-)
-	MEM_START=$(echo "$RANGE" | cut -f1 -d\-)
+	MEM_END=$(echo "$RANGE" | cut -f2 -d-)
+	MEM_START=$(echo "$RANGE" | cut -f1 -d-)
 	MEM_SIZE=$(( 16#${MEM_END} - 16#${MEM_START} ))
 
 	if [ ${MEM_SIZE} -ge ${MEM_REQUIRED} ]; then
 		if modprobe ramoops mem_address=0x${MEM_START} mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
-		       exit 0
+			logger "kdump-steamos: pstore-RAM was loaded successfully"
+			exit 0
 		fi
-		logger "pstore-RAM load was attempted and failed...will try kdump"
+		logger "kdump-steamos: pstore-RAM load failed...will try kdump"
 	fi
 		#  Fallbacks to kdump load - if we fail when configuring pstore, better try kdump;
 		#  who knows and we may be lucky enough to have some crashkernel reserved memory...
-		#  TODO (maybe): could invert the order and try kdump first, if it fails, try pstore!
 fi
 
 #  TODO: insert code here to validate that crashkernel is configured and
@@ -77,6 +78,7 @@ KDUMP_CMDLINE="${KDUMP_CMDLINE} panic=-1 oops=panic fsck.mode=force fsck.repair=
 VMLINUX="$(grep -o 'BOOT_IMAGE=[^ ]*' /proc/cmdline)"
 
 if ! kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img" --append="${KDUMP_CMDLINE}"; then
-	logger "kdump load was attempted and failed"
+	logger "kdump-steamos: kdump load failed"
 	exit 0
 fi
+logger "kdump-steamos: kdump was loaded successfully"
