@@ -4,7 +4,7 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 
 pkgname=kdump-steamos
-pkgver=0.4
+pkgver=0.5
 pkgrel=1
 pkgdesc="Kdump scripts to collect vmcore/dmesg in a small dracut-based initramfs"
 depends=('curl' 'dmidecode' 'dracut' 'jq' 'kexec-tools' 'makedumpfile' 'systemd' 'zip' 'zstd')
