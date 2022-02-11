@@ -11,6 +11,41 @@
 #  avoid failing here to not risk a boot hang.
 #
 
+#  This function has 2 purposes: if 'kdump' is passed as argument and we don't
+#  have crashkernel memory reserved, we edit grub config file and recreate
+#  grub.cfg, so next boot has it reserved; in this case, we also  bail-out,
+#  since kdump can't be loaded anyway.
+#
+#  If 'pstore' is passsed as argument, we try to unset crashkernel iff it's
+#  already set AND the pattern in grub config is the one added by us - if the
+#  users set crashkernel themselves, we don't mess with that.
+grub_update() {
+	GRUBCFG="/etc/default/grub"
+	CRASHK="$(cat /sys/kernel/kexec_crash_size)"
+	SED_ADD="s/^GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"crashkernel=192M crash_kexec_post_notifiers /g"
+
+	if [ "${GRUB_AUTOSET}" -eq 1 ]; then
+		if [ "$1" = "kdump" ] && [ "${CRASHK}" -eq 0 ]; then
+			sed -i "${SED_ADD}" "${GRUBCFG}"
+			update-grub 1>/dev/null
+			sync "/boot/grub/grub.cfg" 2>/dev/null
+			sync "/efi/EFI/steamos/grub.cfg" 2>/dev/null
+
+			logger "kdump-steamos: kdump cannot work, no reserved memory in this boot..."
+			logger "kdump-steamos: but we automatically set crashkernel for next boot."
+			exit 0
+		fi
+
+		if [ "$1" = "pstore" ] && [ "${CRASHK}" -ne 0 ]; then
+			sed -i "s/\"crashkernel=192M crash_kexec_post_notifiers /\"/g" "${GRUBCFG}"
+			update-grub 1>/dev/null
+			sync "/boot/grub/grub.cfg" 2>/dev/null
+			sync "/efi/EFI/steamos/grub.cfg" 2>/dev/null
+			logger "kdump-steamos: clearing crashkernel memory previously set..."
+		fi
+	fi
+}
+
 if [ ! -f "/etc/default/kdump" ]; then
 	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
 	exit 0
@@ -58,18 +93,21 @@ if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 
 	if [ ${MEM_SIZE} -ge ${MEM_REQUIRED} ]; then
 		if modprobe ramoops mem_address=0x${MEM_START} mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
+			#  If Pstore is set, update grub.cfg to avoid reserving crashkernel memory.
 			logger "kdump-steamos: pstore-RAM was loaded successfully"
+			grub_update pstore
 			exit 0
 		fi
 		logger "kdump-steamos: pstore-RAM load failed...will try kdump"
 	fi
-		#  Fallbacks to kdump load - if we fail when configuring pstore, better try kdump;
-		#  who knows and we may be lucky enough to have some crashkernel reserved memory...
+		#  Fallback to kdump load - if we fail when configuring pstore, better
+		#  trying kdump; in case we have crashkernel memory reserved, lucky us.
+		#  If not, we're going to set that automatically on grub_update().
+		#  Notice that if it's not set, we bail-out in grub_update() - there's
+		#  no point in continuing since kdump cannot work.
 fi
 
-#  TODO: insert code here to validate that crashkernel is configured and
-#  memory is reserved; if not, set it on grub.cfg and recreate the EFI grub
-#  config file, warning users that in the current boot kdump is not set.
+grub_update kdump
 
 #  Stolen from Debian kdump
 KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/\\\\"/' /proc/cmdline)

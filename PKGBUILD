@@ -25,12 +25,12 @@ source=('20-kdump-steamos.conf'
 
 sha256sums=('dbedff54addfb5dce51614c73df04c90fca9f27d0d3a690243259ccbbfcca07c'
             '2514f79a496f76af847e262eadd55a5c2f8d95375cc513efa8cadd4cd98fe1d2'
-            'fca89993e6ca76ec14f9a8e6761bec521903e2743ab9e05bfe2cd2b77e5e89f9'
-            'c1feeecf8fc3befbe241e7c78665af3b20258b2593393f91bf300c237623b2de'
+            'd33778b5ba356f96ae2b78998deaeb7059260b8e2aa4253be3f7da4e9877f94c'
+            '7956c6cf1ce5c5e9aaf573ceee8c6ac2a0cad7e0cfa8f5b21adaa20f9f3db929'
             '06b38bd9f09da5fb22a765b6f1945fc349cc5f9d13cd32c9218b9b60b40a9010'
             '12a9124b907f208471ba7aaac0f3261cbbd34a168cce3260fa9e7793994beebd'
             '26bc2b64af0d468f050c0e0dd9e2053176d56886edad9146bc495797bf2c5810'
-            '97d055f9e6e66cc4168767f5b51ff8e728c6935d270a997cf5b082ddd2d30634'
+            'd33778b5ba356f96ae2b78998deaeb7059260b8e2aa4253be3f7da4e9877f94c'
             'b1a4a0f77cae137d3f5155a0fcc4b9d1e1b7ffd0089adb06b6bb21e71c751e27'
             'cbb207ecc0f6bacefbeed41f0d4910daac6500ac2345366e1f95f09a7653c65a')
 

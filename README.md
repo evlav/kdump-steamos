@@ -51,9 +51,9 @@
 #  can choose Kdump instead of Pstore (USE_PSTORE_RAM), and if using Kdump,
 #  collect the full vmcore (FULL_COREDUMP). The vmcore is not stored in the
 #  ZIP file, but it's saved in "/home/.steamos/offload/var/kdump/crash/".
-#  NOTICE that, if Kdump is used instead of Pstore, the following flags are
-#  needed in GRUB cmdline: "crashkernel=192M crash_kexec_post_notifiers" and
-#  a regular reboot is necessary.
+#  NOTICE that, if Kdump is used instead of Pstore (either per user's choice
+#  or due to some failure in Pstore), a reboot is necessary before kdump is
+#  usable, in order to effectively reserve crashkernel memory.
 #
 #  6. Error and succeeding messages are sent to systemd journal, so running
 #  'journalctl | grep kdump' would hopefully bring some information. Also,
@@ -64,14 +64,14 @@
 #  ##############################  DETAILS  ##################################
 #  CAVEATS / INSTRUCTIONS
 #  ###########################################################################
-#  (a) Currently, we don't automatically edit GRUB config; see TODO (1) below.
-#  This is not required if Pstore is used (which is the default).
+#  (a) We automatically edit GRUB config in case Pstore fails or if the user's
+#  choice is to use Kdump. But it requires one reboot in order the crashkernel
+#  memory is effectively reserved by kernel.
 #
-#  In case Kdump is used, boot-time reserved memory is required, check step (5)
-#  in the HOW-TO above. The memory amount was empirically determined - setting
-#  144M wasn't enough and 160M is unstable, so 192M seems good enough. This
-#  amount might change in future kernel versions, requiring tests using the
-#  approach suggested in the step (4) above.
+#  In case Kdump is used, the crashkernel necessary memory was empirically
+#  determined; setting 144M wasn't enough, 160M is unstable, so 192M seems
+#  good enough. This amount might change in future kernel versions, requiring
+#  tests using the approach suggested in the step (4) above.
 #
 #  (b) The kdump-steamos package requires a RW rootfs in case it's not currently
 #  embedded in your image. Users can make use of 'tune2fs' or 'steamos-readonly'
@@ -95,32 +95,29 @@
 #
 #  TODOs
 #  ###########################################################################
-#  (1) We'd like to be able to automatically edit GRUB and recreate its config
-#  file - implementation tests are ongoing.
-#
-#  (2) Would be interesting to have a clean-up mechanism, to keep up to N most
+#  (1) Would be interesting to have a clean-up mechanism, to keep up to N most
 #  recent ZIP log files, instead of keeping all of them forever.
 #
-#  (3) Hopefully we can fix/prevent the unnecessary re-creation of all initramfs
+#  (2) Hopefully we can fix/prevent the unnecessary re-creation of all initramfs
 #  images - it happens due to our package installing files on directory
 #  "/usr/lib/dracut/modules.d" which triggers the unfortunate initramfs rebuild.
 #
-#  (4) We have a "fragile" way of determining a mount point required for Kdump;
+#  (3) We have a "fragile" way of determining a mount point required for Kdump;
 #  this is something to improve maybe, in order to make the Kdump more reliable.
 #  Also in the list of fragile things, VDF parsing is...complicated. Something
 #  that would be nice to improve as well.
 #
-#  (5) Pstore ramoops back-end has some limitations that we're discussing with
+#  (4) Pstore ramoops back-end has some limitations that we're discussing with
 #  the kernel community - right now we can only collect ONE dmesg and its
 #  size is truncated on "record_size" bytes, not allowing a file split like
 #  efi-pstore; thankfully we still can collect 2MiB dmesg, but hopefully we can
 #  improve that upstream.
 #
-#  (6) Add a more reliable reboot mechanism - we had seen issues in the past
+#  (5) Add a more reliable reboot mechanism - we had seen issues in the past
 #  with "reboot -f", and relying in sysrq reboot as a quirk managed to be a safe
 #  option, so this is something to think about. Should be easy to implement.
 #
-#  (7) Maybe a good idea would be to allow creating the minimum image for any
+#  (6) Maybe a good idea would be to allow creating the minimum image for any
 #  specified kernel, not only for the running one (which is what we do now).
 #  Low-priority idea, easy to implement.
 #

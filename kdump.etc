@@ -18,15 +18,19 @@ MOUNT_DEVNODE="nvme0n1p8"
 KDUMP_FOLDER="/.steamos/offload/var/kdump"
 KDUMP_MNT="/tmp/kdump.mnt"
 
-#  Dump controlling settings - for now we don't have network/iscsi dumps, only
+#  Kdump controlling settings - for now we don't have network/iscsi dumps, only
 #  local storage dumps. If FULL_COREDUMP is !=0, we collect a full compressed
 #  vmcore, which might require a lot of disk space. The *_CMD settings refer
-#  to tunnings on makedumpfile - we rely on zstd compression and maximum page
-#  exclusion for the full vmcore, mimic'ing Debian kdump.
+#  to tunings on makedumpfile - we rely on zstd compression and maximum page
+#  exclusion for the full vmcore, mimic'ing Debian kdump. Finally, GRUB_AUTOSET
+#  determines if kdump-steamos should try to automatically set grub.cfg in
+#  order to reserve memory for kdump (if needed, i.e., when pstore is not in
+#  use) - keep it as '1' for enabling the mechanism (this is the default).
 
 FULL_COREDUMP=0
 MAKEDUMPFILE_COREDUMP_CMD="-z -d 31"
 MAKEDUMPFILE_DMESG_CMD="--dump-dmesg"
+GRUB_AUTOSET=1
 
 #  Pstore-RAM setting - if enabled, Kdump won't be loaded, instead the Pstore
 #  RAM backend will be configured. In order to have success, this operation
