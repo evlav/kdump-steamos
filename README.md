@@ -57,8 +57,9 @@
 #
 #  6. Error and succeeding messages are sent to systemd journal, so running
 #  'journalctl | grep kdump' would hopefully bring some information. Also,
-#  the ZIP file collected is automatically submitted to Valve servers; see
-#  below under DETAILS/LOG SUBMISSION for API details, decisions made, etc.
+#  the ZIP file collected is automatically submitted to Valve servers (unless
+#  the feature is disabled by the user); see below under DETAILS/LOG SUBMISSION
+#  for API details, decisions made, how to disable the feature, etc.
 #
 #
 #  ##############################  DETAILS  ##################################
@@ -127,14 +128,15 @@
 #  The logs collected and compressed in the ZIP file are kept in the system,
 #  but they provide valuable data to Valve in order to determine issue in the
 #  field, and hopefully fix them, so users are happy. Hence, the kdump-steamos
-#  is capable now to submit logs to Valve servers, through an API. Below such
-#  API is described, but first worth to mention some assumptions / decisions
-#  made in the log submission mechanism:
+#  is capable to submit logs to Valve servers, through an API. If users wish
+#  to disable this feature, just set LOG_SUBMISSION=0 in /etc/default/kdump.
+#  Below such API is described, but first worth to mention some assumptions
+#  and decisions made in the log submission mechanism:
 #
 #  * First of all, we attempt to verify network connectivity by pinging the
 #    URL "steampowered.com" - quick pings (2 packets, 0.5s between each one)
 #    are attempted, but if after 99 of such pings network is considered not
-#    not reliable, the log submission is aborted, but the ZIP file is kept
+#    reliable, the log submission is aborted, but the ZIP file is kept
 #    locally of course.
 #
 #  * The 'curl' tool is used to submit the requests to Valve servers; for

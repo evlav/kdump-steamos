@@ -11,6 +11,17 @@
 #  if kdump logs are present.
 #
 
+#  Function to bail-out in case logs can't/shouldn't be sent to Valve servers.
+#  Arg1: folder  /  Arg2: full filename
+save_locally_and_bail() {
+	mkdir -p "$1"
+	mv "$2" "$1"
+
+	LOG_FNAME="$(basename "$2")"
+	logger "kdump-steamos: logs not submitted, only saved locally ($1/${LOG_FNAME})"
+	exit 0
+}
+
 #  We do some validation to be sure KDUMP_MNT pointed path is valid...
 #  That and having a valid /etc/default/kdump are essential conditions.
 if [ ! -f "/etc/default/kdump" ]; then
@@ -174,10 +185,20 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 	##############################
 
 
+	NOT_SENT_FLD="${KDUMP_MAIN_FOLDER}/not_sent_logs"
+	SENT_FLD="${KDUMP_MAIN_FOLDER}/sent_logs"
+
 	#  The POST request requires a valid Steam ID.
 	if [ "${STEAM_ID}" -eq 0 ]; then
 		logger "kdump-steamos: invalid Steam ID, cannot submit logs"
-		exit 0
+		LOG_SUBMISSION=0 #  force to enter next conditional
+	fi
+
+	#  If users don't want to submit the logs (or Steam ID is invalid),
+	#  just save them locally and bail out.
+	if [ "${LOG_SUBMISSION}" -eq 0 ]; then
+		rm -rf  "${KDUMP_LOGS_FOLDER}"
+		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
 	#  Construct the POST request fields...
@@ -213,7 +234,7 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 	# Bail out in case we have network issues
 	if [ ${LOOP_CNT} -ge ${MAX_LOOP} ]; then
 		logger "kdump-steamos: network issue - cannot send logs"
-		exit 0
+		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
 	CURL_ERR="${KDUMP_MAIN_FOLDER}/.curl_err"
@@ -224,7 +245,8 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 	if ! curl -X POST -d "${POST_REQ}" "${START_URL}" 1>"${RESPONSE_FILE}" 2>"${CURL_ERR}"; then
 		logger "kdump-steamos: curl issues - failed in the log submission POST (err=$?)"
 		#rm -f "${RESPONSE_FILE}" #  keep this for now, as debug information
-		exit 0
+
+		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
 	RESPONSE_PUT_URL="$(jq -r '.response.url' "${RESPONSE_FILE}")"
@@ -238,7 +260,8 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 	if [ "${PUT_HEADERS_LEN}" -le 0 ] || [ "${PUT_HEADERS_LEN}" -gt 20 ]; then
 		logger "kdump-steamos: unsupported number of response headers (${PUT_HEADERS_LEN}), aborting..."
 		#rm -f "${RESPONSE_FILE}" #  keep this for now, as debug information
-		exit 0
+
+		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
 	LOOP_CNT=0
@@ -254,23 +277,28 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 	if ! curl -X PUT --data-binary "@${LOG_FNAME}" -H "@${CURL_PUT_HEADERS}" "${RESPONSE_PUT_URL}" 1>/dev/null 2>"${CURL_ERR}"; then
 		logger "kdump-steamos: curl issues - failed in the log submission PUT (err=$?)"
 		#rm -f "${CURL_PUT_HEADERS}" #  keep this for now, as debug information
-		exit 0
+
+		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
-	rm -f "${CURL_PUT_HEADERS}"
 	if ! curl -X POST -d "gid=${RESPONSE_GID}" "${FINISH_URL}" 1>/dev/null 2>"${CURL_ERR}"; then
 		logger "kdump-steamos: curl issues - failed in the log finish POST (err=$?)"
-		exit 0
+		#rm -f "${CURL_PUT_HEADERS}" #  keep this for now, as debug information
+
+		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
 	#  If we reached this point, the zipped log should have been submitted
 	#  succesfully; save a local copy as well.
 	#  TODO: implement a clean-up routine to just keep up to N logs...
 
+	rm -f "${CURL_PUT_HEADERS}"
 	rm -f "${CURL_ERR}"
-	SENT_FLD="${KDUMP_MAIN_FOLDER}/sent_logs/"
 	mkdir -p "${SENT_FLD}"
 
+	logger "kdump-steamos: successfully submitted crash logs to Valve"
+
 	mv "${LOG_FNAME}" "${SENT_FLD}"
-	logger "kdump-steamos: successfully submitted crash log to Valve"
+	LOG_FNAME="$(basename "${LOG_FNAME}")"
+	logger "kdump-steamos: logs also saved locally (${SENT_FLD}/${LOG_FNAME})"
 fi
