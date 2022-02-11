@@ -84,7 +84,7 @@
 #  unfortunately after installing the kdump-steamos package *all* initramfs
 #  images are recreated - this is not necessary, we're thinking how to prevent
 #  that, but for now be prepared: the installation take some (long) minutes only
-#  due to that ={
+#  due to that...
 #
 #  (d) Unfortunately makedumpfile from Arch Linux is not available on official
 #  repos, only in AUR. But it is available on Holo, so we make use of that.
@@ -95,29 +95,29 @@
 #
 #  TODOs
 #  ###########################################################################
-#  (1) Would be interesting to have a clean-up mechanism, to keep up to N most
+#  * Would be interesting to have a clean-up mechanism, to keep up to N most
 #  recent ZIP log files, instead of keeping all of them forever.
 #
-#  (2) Hopefully we can fix/prevent the unnecessary re-creation of all initramfs
+#  * Hopefully we can fix/prevent the unnecessary re-creation of all initramfs
 #  images - it happens due to our package installing files on directory
 #  "/usr/lib/dracut/modules.d" which triggers the unfortunate initramfs rebuild.
 #
-#  (3) We have a "fragile" way of determining a mount point required for Kdump;
+#  * We have a "fragile" way of determining a mount point required for Kdump;
 #  this is something to improve maybe, in order to make the Kdump more reliable.
 #  Also in the list of fragile things, VDF parsing is...complicated. Something
 #  that would be nice to improve as well.
 #
-#  (4) Pstore ramoops back-end has some limitations that we're discussing with
+#  * Pstore ramoops back-end has some limitations that we're discussing with
 #  the kernel community - right now we can only collect ONE dmesg and its
 #  size is truncated on "record_size" bytes, not allowing a file split like
 #  efi-pstore; thankfully we still can collect 2MiB dmesg, but hopefully we can
 #  improve that upstream.
 #
-#  (5) Add a more reliable reboot mechanism - we had seen issues in the past
+#  * Add a more reliable reboot mechanism - we had seen issues in the past
 #  with "reboot -f", and relying in sysrq reboot as a quirk managed to be a safe
 #  option, so this is something to think about. Should be easy to implement.
 #
-#  (6) Maybe a good idea would be to allow creating the minimum image for any
+#  * Maybe a good idea would be to allow creating the minimum image for any
 #  specified kernel, not only for the running one (which is what we do now).
 #  Low-priority idea, easy to implement.
 #
