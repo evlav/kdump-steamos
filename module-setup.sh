@@ -34,5 +34,5 @@ install() {
     cp -LR --preserve=all /usr/lib/kdump/* $initdir/usr/lib/kdump/
     cp -LR --preserve=all /etc/default/kdump $initdir/usr/lib/kdump/kdump.etc
 
-    inst_hook pre-mount 01 "$moddir/kdump_collect.sh"
+    inst_hook pre-mount 01 "$moddir/kdump-collect.sh"
 }

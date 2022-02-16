@@ -8,5 +8,5 @@
 #  it's invoked by systemd, basically it just loads a detached
 #  process and exits successfuly, in order to prevent boot hangs.
 
-/usr/lib/kdump/submit_report.sh & disown
+/usr/lib/kdump/submit-report.sh & disown
 exit 0

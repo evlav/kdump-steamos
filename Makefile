@@ -16,9 +16,9 @@ install: all
 	install -D -m0644 kdump.etc $(DESTDIR)$(sysconfdir)/default/kdump
 	install -D -m0644 kdump-steamos.service $(DESTDIR)$(systemdunitsdir)/kdump-steamos.service
 	install -D -m0644 20-kdump-steamos.conf $(DESTDIR)$(sysctldir)/20-kdump-steamos.conf
-	install -D -m0755 kdump_collect.sh $(DESTDIR)$(dracutmodulesdir)/55kdump/kdump_collect.sh
+	install -D -m0755 kdump-collect.sh $(DESTDIR)$(dracutmodulesdir)/55kdump/kdump-collect.sh
 	install -D -m0755 module-setup.sh $(DESTDIR)$(dracutmodulesdir)/55kdump/module-setup.sh
 	install -D -m0644 README.md $(DESTDIR)$(dracutmodulesdir)/55kdump/README
-	install -D -m0755 kdump_load.sh $(DESTDIR)$(libdir)/kdump/kdump_load.sh
-	install -D -m0755 submit_report.sh $(DESTDIR)$(libdir)/kdump/submit_report.sh
-	install -D -m0755 submitter_load.sh $(DESTDIR)$(libdir)/kdump/submitter_load.sh
+	install -D -m0755 kdump-load.sh $(DESTDIR)$(libdir)/kdump/kdump-load.sh
+	install -D -m0755 submit-report.sh $(DESTDIR)$(libdir)/kdump/submit-report.sh
+	install -D -m0755 submitter-load.sh $(DESTDIR)$(libdir)/kdump/submitter-load.sh

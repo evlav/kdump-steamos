@@ -6,7 +6,7 @@
 #
 #  Configuration settings for SteamOS kdump. After _any_ change in this
 #  file, it's required to create the kdump minimal initramfs by running:
-#  /usr/lib/kdump/kdump_load.sh initrd
+#  /usr/lib/kdump/kdump-load.sh initrd
 #
 
 #  Mount-related options - the DEVNODE must exist and be available during the
