@@ -24,8 +24,10 @@ if [ ! -f $VMCORE ]; then
 	reboot -f
 fi
 
+DEVN="$(cat /usr/lib/kdump/kdump.devnode)"
 mkdir -p "/kdump_path"
-if ! mount "/dev/${MOUNT_DEVNODE}" /kdump_path; then
+
+if ! mount "${DEVN}" /kdump_path; then
 	reboot -f
 fi
 
@@ -39,7 +41,7 @@ if [ "${FULL_COREDUMP}" -ne 0 ]; then
 	sync "${KDUMP_FOLDER}/vmcore.compressed"
 fi
 
-umount "/dev/${MOUNT_DEVNODE}"
+umount "${DEVN}"
 sync
 
 reboot -f

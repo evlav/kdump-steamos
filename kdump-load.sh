@@ -53,8 +53,8 @@ fi
 
 . /etc/default/kdump
 
-#  Fragile way for finding the proper mount point for DEVNODE:
-DEVN_MOUNTED=$(mount |grep "${MOUNT_DEVNODE}" | head -n1 | cut -f3 -d\ )
+#  Find the proper mount point for /home:
+DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"
 KDUMP_FOLDER="${DEVN_MOUNTED}/${KDUMP_FOLDER}"
 
 echo "${KDUMP_FOLDER}" > "${KDUMP_MNT}"

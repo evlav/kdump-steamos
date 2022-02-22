@@ -9,12 +9,13 @@
 #  /usr/lib/kdump/kdump-load.sh initrd
 #
 
-#  Mount-related options - the DEVNODE must exist and be available during the
-#  kdump script execution. The KDUMP_FOLDER will be create if doesn't exist.
-#  The KDUMP_MNT is just a temporary file that will carry the mounted folder
-#  path across boot-time scripts.
+#  Mount-related options - the DEVNODE points to the /home directory link;
+#  this is used to derive the numerical devnode for kdump, since the link
+#  is not present so early in the system boot. The KDUMP_FOLDER will be
+#  created if doesn't exist. The KDUMP_MNT is just a temporary file that
+#  carries the mounted folder path across boot-time scripts.
 
-MOUNT_DEVNODE="nvme0n1p8"
+MOUNT_DEVNODE="/dev/disk/by-partsets/shared/home"
 KDUMP_FOLDER="/.steamos/offload/var/kdump"
 KDUMP_MNT="/tmp/kdump.mnt"
 

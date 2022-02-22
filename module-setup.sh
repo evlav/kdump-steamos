@@ -18,6 +18,13 @@ installkernel() {
 }
 
 install() {
+    #  Having a valid /etc/default/kdump is essential for kdump.
+    if [ ! -f "/etc/default/kdump" ]; then
+        return 1
+    fi
+
+    . /etc/default/kdump
+
     #  First clear all unnecessary firmwares/drivers added by drm in order to
     #  reduce the size of this minimal initramfs being created. This should
     #  be already done via command-line arguments, but let's play safe and delete
@@ -31,6 +38,12 @@ install() {
     inst makedumpfile
 
     mkdir -p $initdir/usr/lib/kdump
+
+    #  Determine the numerical devnode for kdump, and save it on initrd;
+    #  notice that partset link is not available that early in boot time.
+    DEVN="$(readlink -f "${MOUNT_DEVNODE}")"
+    echo "${DEVN}" > $initdir/usr/lib/kdump/kdump.devnode
+
     cp -LR --preserve=all /usr/lib/kdump/* $initdir/usr/lib/kdump/
     cp -LR --preserve=all /etc/default/kdump $initdir/usr/lib/kdump/kdump.etc
 

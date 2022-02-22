@@ -93,6 +93,16 @@
 #  https://lists.archlinux.org/pipermail/aur-general/2022-January/036767.html
 #  https://aur.archlinux.org/packages/makedumpfile/#comment-843853
 #
+#  (e) NVMe multipathing introduced a "randomness" level to device naming on
+#  Linux, so "nvme0n1" could be "nvme1n1" in some boots, if we have more than
+#  one NVMe device. There's a kernel parameter to avoid that
+#  ("nvme_core.multipath=0"). So, since we rely in getting the NVMe device name
+#  to be used in kdump during the regular boot process, we could in theory have
+#  different names between regular kernel boot and the kdump one, hence causing
+#  a failure in kdump collection. But this is pretty much safe now since we
+#  don't have multiple NVMe devices, also we could disable multipath in kernel
+#  config (CONFIG_NVME_MULTIPATH) or use the above cmdline.
+#
 #
 #  TODOs
 #  ###########################################################################
@@ -103,10 +113,8 @@
 #  images - it happens due to our package installing files on directory
 #  "/usr/lib/dracut/modules.d" which triggers the unfortunate initramfs rebuild.
 #
-#  * We have a "fragile" way of determining a mount point required for Kdump;
-#  this is something to improve maybe, in order to make the Kdump more reliable.
-#  Also in the list of fragile things, VDF parsing is...complicated. Something
-#  that would be nice to improve as well.
+#  * VDF parsing would benefit from some improvement, it's at least "fragile"
+#  for now, to be generous...but that seems a bit complicated.
 #
 #  * Pstore ramoops back-end has some limitations that we're discussing with
 #  the kernel community - right now we can only collect ONE dmesg and its
