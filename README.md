@@ -20,10 +20,10 @@
 #  ############################  HOW-TO USE IT  ##############################
 #
 #
-#  1. Install the package with pacman if not available in your image - there's
-#  a prebuilt binary package in this gitlab; to check if it's already installed
-#  look the pacman installed package list. Also, be sure the systemd service
-#  was properly loaded by checking 'systemctl status kdump-steamos.service'.
+#  1. Install the package with pacman if not available in your image; to check
+#  if it's already installed look the pacman installed package list. Also, be
+#  sure the systemd service was properly loaded by checking
+#  'systemctl status kdump-steamos.service'.
 #
 #  2. In a crash event, the dmesg log is collected, and by default this happens
 #  via the Pstore mechanism, i.e., no extra memory should be reserved and no
