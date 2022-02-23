@@ -46,7 +46,7 @@ grub_update() {
 	fi
 }
 
-if [ ! -f "/etc/default/kdump" ]; then
+if [ ! -s "/etc/default/kdump" ]; then
 	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
 	exit 0
 fi

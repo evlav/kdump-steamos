@@ -19,7 +19,7 @@ installkernel() {
 
 install() {
     #  Having a valid /etc/default/kdump is essential for kdump.
-    if [ ! -f "/etc/default/kdump" ]; then
+    if [ ! -s "/etc/default/kdump" ]; then
         return 1
     fi
 

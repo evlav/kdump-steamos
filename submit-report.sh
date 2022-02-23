@@ -24,7 +24,7 @@ save_locally_and_bail() {
 
 #  We do some validation to be sure KDUMP_MNT pointed path is valid...
 #  That and having a valid /etc/default/kdump are essential conditions.
-if [ ! -f "/etc/default/kdump" ]; then
+if [ ! -s "/etc/default/kdump" ]; then
 	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
 	exit 0
 fi
