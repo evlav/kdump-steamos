@@ -29,23 +29,23 @@ install() {
     #  reduce the size of this minimal initramfs being created. This should
     #  be already done via command-line arguments, but let's play safe and delete
     #  from here as well just in case.
-    rm -rf $initdir/usr/lib/firmware/amdgpu/
-    rm -rf $initdir/usr/lib/modules/*/kernel/drivers/gpu/drm/amd/*
+    rm -rf "$initdir"/usr/lib/firmware/amdgpu/
+    rm -rf "$initdir"/usr/lib/modules/*/kernel/drivers/gpu/drm/amd/*
 
     #  Install necessary binaries
     inst date
     inst sync
     inst makedumpfile
 
-    mkdir -p $initdir/usr/lib/kdump
+    mkdir -p "$initdir"/usr/lib/kdump
 
     #  Determine the numerical devnode for kdump, and save it on initrd;
     #  notice that partset link is not available that early in boot time.
     DEVN="$(readlink -f "${MOUNT_DEVNODE}")"
-    echo "${DEVN}" > $initdir/usr/lib/kdump/kdump.devnode
+    echo "${DEVN}" > "$initdir"/usr/lib/kdump/kdump.devnode
 
-    cp -LR --preserve=all /usr/lib/kdump/* $initdir/usr/lib/kdump/
-    cp -LR --preserve=all /etc/default/kdump $initdir/usr/lib/kdump/kdump.etc
+    cp -LR --preserve=all /usr/lib/kdump/* "$initdir"/usr/lib/kdump/
+    cp -LR --preserve=all /etc/default/kdump "$initdir"/usr/lib/kdump/kdump.etc
 
     inst_hook pre-mount 01 "$moddir/kdump-collect.sh"
 }

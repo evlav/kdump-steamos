@@ -92,7 +92,7 @@ if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 	MEM_SIZE=$(( 16#${MEM_END} - 16#${MEM_START} ))
 
 	if [ ${MEM_SIZE} -ge ${MEM_REQUIRED} ]; then
-		if modprobe ramoops mem_address=0x${MEM_START} mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
+		if modprobe ramoops mem_address=0x"${MEM_START}" mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
 			#  If Pstore is set, update grub.cfg to avoid reserving crashkernel memory.
 			logger "kdump-steamos: pstore-RAM was loaded successfully"
 			grub_update pstore

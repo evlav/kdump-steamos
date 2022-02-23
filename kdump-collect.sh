@@ -33,10 +33,13 @@ fi
 
 mkdir -p "${KDUMP_FOLDER}"
 
+#  we want to split on spaces, it's a set of parameters!
+#  shellcheck disable=SC2086
 /usr/bin/makedumpfile ${MAKEDUMPFILE_DMESG_CMD} $VMCORE "${KDUMP_FOLDER}/dmesg.txt"
 sync "${KDUMP_FOLDER}/dmesg.txt"
 
 if [ "${FULL_COREDUMP}" -ne 0 ]; then
+	#  shellcheck disable=SC2086
 	/usr/bin/makedumpfile ${MAKEDUMPFILE_COREDUMP_CMD} $VMCORE "${KDUMP_FOLDER}/vmcore.compressed"
 	sync "${KDUMP_FOLDER}/vmcore.compressed"
 fi
