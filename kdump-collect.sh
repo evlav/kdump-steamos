@@ -11,7 +11,7 @@
 #  and get stuck in this minimal initramfs with no output for the user.
 #
 
-. /usr/lib/kdump/kdump.etc
+. /usr/lib/kdump/kdump.conf
 
 VMCORE="/proc/vmcore"
 KDUMP_TIMESTAMP=$(date -u +"%Y%m%d%H%M")

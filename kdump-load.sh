@@ -46,12 +46,12 @@ grub_update() {
 	fi
 }
 
-if [ ! -s "/etc/default/kdump" ]; then
-	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
+if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
+	logger "kdump-steamos: /usr/share/kdump/kdump.conf is missing, aborting."
 	exit 0
 fi
 
-. /etc/default/kdump
+. /usr/share/kdump/kdump.conf
 
 #  Find the proper mount point for /home:
 DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"
@@ -77,7 +77,7 @@ if [ "$1" = "clear" ]; then
 	exit 0
 fi
 
-#  Pstore-RAM load; if it is configured via /etc/default/kdump and fails
+#  Pstore-RAM load; if it is configured via /usr/share/kdump/kdump.conf and fails
 #  to configure pstore, we still try to load the kdump. We try to reserve
 #  here a 5MiB memory region.
 #  Notice that we assume ramoops is a module here - if built-in, we should

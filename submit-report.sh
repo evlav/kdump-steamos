@@ -67,13 +67,13 @@ get_steam_account_id() {
 
 
 #  We do some validation to be sure KDUMP_MNT pointed path is valid...
-#  That and having a valid /etc/default/kdump are essential conditions.
-if [ ! -s "/etc/default/kdump" ]; then
-	logger "kdump-steamos: /etc/default/kdump not present - aborting..."
+#  That and having a valid /usr/share/kdump/kdump.conf are essential conditions.
+if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
+	logger "kdump-steamos: /usr/share/kdump/kdump.conf is missing, aborting."
 	exit 0
 fi
 
-. /etc/default/kdump
+. /usr/share/kdump/kdump.conf
 
 KDUMP_MAIN_FOLDER="$(cat "${KDUMP_MNT}")"
 rm -f "${KDUMP_MNT}"

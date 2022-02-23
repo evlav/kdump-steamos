@@ -47,7 +47,7 @@
 #  This action will trigger a dummy crash and reboot the system; check if
 #  there is a ZIP file with the crash logs in the directory described in (3).
 #
-#  5. Some tunings are available at "/etc/default/kdump"; for example users
+#  5. Some tunings are available at "/usr/share/kdump/kdump.conf"; e.g. users
 #  can choose Kdump instead of Pstore (USE_PSTORE_RAM), and if using Kdump,
 #  collect the full vmcore (FULL_COREDUMP). The vmcore is not stored in the
 #  ZIP file, but it's saved in "/home/.steamos/offload/var/kdump/crash/".
@@ -137,9 +137,9 @@
 #  but they provide valuable data to Valve in order to determine issue in the
 #  field, and hopefully fix them, so users are happy. Hence, the kdump-steamos
 #  is capable to submit logs to Valve servers, through an API. If users wish
-#  to disable this feature, just set LOG_SUBMISSION=0 in /etc/default/kdump.
-#  Below such API is described, but first worth to mention some assumptions
-#  and decisions made in the log submission mechanism:
+#  to disable this feature, just set LOG_SUBMISSION=0 in the config file
+#  "/usr/share/kdump/kdump.conf". Below such API is described, but first worth
+#  to mention some assumptions / decisions made in the log submission mechanism:
 #
 #  * First of all, we attempt to verify network connectivity by pinging the
 #    URL "steampowered.com" - quick pings (2 packets, 0.5s between each one)

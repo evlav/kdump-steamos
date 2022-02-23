@@ -1,7 +1,7 @@
 prefix     := /usr
-sysconfdir := /etc
 
 libdir     := $(prefix)/lib
+sharedir     := $(prefix)/share
 
 systemdunitsdir := $(shell pkg-config --define-variable=prefix=$(prefix) --variable=systemdsystemunitdir systemd 2>/dev/null \
 			  || echo $(libdir)/systemd/system/)
@@ -13,7 +13,6 @@ dracutmodulesdir := $(shell pkg-config --define-variable=prefix=$(prefix) --vari
 all:
 
 install: all
-	install -D -m0644 kdump.etc $(DESTDIR)$(sysconfdir)/default/kdump
 	install -D -m0644 kdump-steamos.service $(DESTDIR)$(systemdunitsdir)/kdump-steamos.service
 	install -D -m0644 20-kdump-steamos.conf $(DESTDIR)$(sysctldir)/20-kdump-steamos.conf
 	install -D -m0755 kdump-collect.sh $(DESTDIR)$(dracutmodulesdir)/55kdump/kdump-collect.sh
@@ -22,3 +21,4 @@ install: all
 	install -D -m0755 kdump-load.sh $(DESTDIR)$(libdir)/kdump/kdump-load.sh
 	install -D -m0755 submit-report.sh $(DESTDIR)$(libdir)/kdump/submit-report.sh
 	install -D -m0755 submitter-load.sh $(DESTDIR)$(libdir)/kdump/submitter-load.sh
+	install -D -m0644 kdump.conf $(DESTDIR)$(sharedir)/kdump/kdump.conf

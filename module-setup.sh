@@ -18,12 +18,12 @@ installkernel() {
 }
 
 install() {
-    #  Having a valid /etc/default/kdump is essential for kdump.
-    if [ ! -s "/etc/default/kdump" ]; then
+    #  Having a valid /usr/share/kdump/kdump.conf is essential for kdump.
+    if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
         return 1
     fi
 
-    . /etc/default/kdump
+    . /usr/share/kdump/kdump.conf
 
     #  First clear all unnecessary firmwares/drivers added by drm in order to
     #  reduce the size of this minimal initramfs being created. This should
@@ -45,7 +45,7 @@ install() {
     echo "${DEVN}" > "$initdir"/usr/lib/kdump/kdump.devnode
 
     cp -LR --preserve=all /usr/lib/kdump/* "$initdir"/usr/lib/kdump/
-    cp -LR --preserve=all /etc/default/kdump "$initdir"/usr/lib/kdump/kdump.etc
+    cp -LR --preserve=all /usr/share/kdump/kdump.conf "$initdir"/usr/lib/kdump/kdump.conf
 
     inst_hook pre-mount 01 "$moddir/kdump-collect.sh"
 }
