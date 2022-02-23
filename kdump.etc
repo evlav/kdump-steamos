@@ -43,9 +43,3 @@ USE_PSTORE_RAM=1
 #  Setting LOG_SUBMISSION to '0' will disable this behavior; but notice that
 #  even with the log submission disabled, the logs are saved locally.
 LOG_SUBMISSION=1
-
-#  Below some log submission settings, based on Steam config files and Valve
-#  URLs. These settings *should not* be changed, or else the log sending
-#  mechanism will be impaired.
-LOGINVDF="/home/doorstop/.local/share/Steam/config/loginusers.vdf"
-POST_URL="https://api.steampowered.com/ICrashReportService/ACTIONCrashUpload/v1"

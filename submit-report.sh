@@ -22,6 +22,50 @@ save_locally_and_bail() {
 	exit 0
 }
 
+#  Next function is used to get Steam Account/ID from the VDF file for
+#  the current user; in case it fails, STEAM_ID and STEAM_ACCOUNT vars
+#  aren't updated.
+#  Arg1: devnode information to determine the /home mount point.
+
+get_steam_account_id() {
+	#  Step 1: get the /home mount point.
+	HOMEFLD="$(findmnt "$1" -fno TARGET)"
+
+	#  Step 2: determine the username; notice that
+	#  UID_MIN = 1000, UID_MAX = 60000 from "/etc/login.defs", but
+	#  getent takes long time to check all of them, so we restrict
+	#  to UID = 1000 only.
+	USERN="$(getent passwd 1000 | cut -f1 -d:)"
+
+	#  Let's determine the VDF file location using the above info.
+	LOGINVDF="${HOMEFLD}/${USERN}/.local/share/Steam/config/loginusers.vdf"
+	if [ ! -s "${LOGINVDF}" ]; then #  bail if no valid VDF is found.
+		return
+	fi
+
+	#  Step 3: Parse the VDF file to obtain Account/ID; the following AWK
+	#  command was borrowed from: https://unix.stackexchange.com/a/663959.
+	NUMREG=$(grep -c AccountName "${LOGINVDF}")
+	IDX=1
+	while [ ${IDX} -le "${NUMREG}" ]; do
+		MR=$(awk -v n=${IDX} -v RS='}' 'NR==n{gsub(/.*\{\n|\n$/,""); print}' "${LOGINVDF}" | grep "MostRecent" | cut -f4 -d\")
+		if [ "$MR" -ne 1 ]; then
+			IDX=$((IDX + 1))
+			continue
+		fi
+
+		STEAM_ACCOUNT=$(awk -v n=${IDX} -v RS='}' 'NR==n{gsub(/.*\{\n|\n$/,""); print}' "${LOGINVDF}" | grep "AccountName" | cut -f4 -d\")
+
+		#  Get also the Steam ID, used in the POST request to Valve servers; this
+		#  is a bit fragile, but there's no proper VDF parse tooling it seems...
+		LN=$(grep -n "AccountName.*${STEAM_ACCOUNT}\"" "${LOGINVDF}" | cut -f1 -d:)
+		LN=$((LN - 2))
+		STEAM_ID=$(sed -n "${LN}p" "${LOGINVDF}" | cut -f2 -d\")
+		break
+	done
+}
+
+
 #  We do some validation to be sure KDUMP_MNT pointed path is valid...
 #  That and having a valid /etc/default/kdump are essential conditions.
 if [ ! -s "/etc/default/kdump" ]; then
@@ -128,28 +172,7 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 
 	STEAM_ACCOUNT=0
 	STEAM_ID=0
-	if [ -s "${LOGINVDF}" ]; then
-		#  The following awk command was borrowed from:
-		#  https://unix.stackexchange.com/a/663959
-		NUMREG=$(grep -c AccountName "${LOGINVDF}")
-		IDX=1
-		while [ ${IDX} -le "${NUMREG}" ]; do
-			MR=$(awk -v n=${IDX} -v RS='}' 'NR==n{gsub(/.*\{\n|\n$/,""); print}' "${LOGINVDF}" | grep "MostRecent" | cut -f4 -d\")
-			if [ "$MR" -ne 1 ]; then
-				IDX=$((IDX + 1))
-				continue
-			fi
-
-			STEAM_ACCOUNT=$(awk -v n=${IDX} -v RS='}' 'NR==n{gsub(/.*\{\n|\n$/,""); print}' "${LOGINVDF}" | grep "AccountName" | cut -f4 -d\")
-
-			#  Get also the Steam ID, used in the POST request to Valve servers; this
-			#  is a bit fragile, but there's no proper VDF parse tooling it seems...
-			LN=$(grep -n "AccountName.*${STEAM_ACCOUNT}\"" "${LOGINVDF}" | cut -f1 -d:)
-			LN=$((LN - 2))
-			STEAM_ID=$(sed -n "${LN}p" "${LOGINVDF}" | cut -f2 -d\")
-			break
-		done
-	fi
+	get_steam_account_id "${MOUNT_DEVNODE}"
 
 	#  Here we collect some more info, like DMI data, os-release, etc;
 	#  TODO: Add Steam application / Proton / Games logs collection...
@@ -237,9 +260,11 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 		save_locally_and_bail "${NOT_SENT_FLD}" "${LOG_FNAME}"
 	fi
 
+	#  These URLs are hardcoded based on Valve's server information.
+	START_URL="https://api.steampowered.com/ICrashReportService/StartCrashUpload/v1"
+	FINISH_URL="https://api.steampowered.com/ICrashReportService/FinishCrashUpload/v1"
+
 	CURL_ERR="${KDUMP_MAIN_FOLDER}/.curl_err"
-	START_URL="$(echo "${POST_URL}" | sed 's/ACTION/Start/g')"
-	FINISH_URL="$(echo "${POST_URL}" | sed 's/ACTION/Finish/g')"
 	RESPONSE_FILE="${KDUMP_MAIN_FOLDER}/.curl_response"
 
 	if ! curl -X POST -d "${POST_REQ}" "${START_URL}" 1>"${RESPONSE_FILE}" 2>"${CURL_ERR}"; then

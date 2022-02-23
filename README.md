@@ -161,8 +161,7 @@
 #  => The API details: it works by a first POST request to Valve servers,
 #  which, when succeed, returns 3 main components in the response. We use
 #  these values to perform a PUT request with the ZIP compressed file, and
-#  finally a last POST request is necessary to finish the transaction. The
-#  POST requests' URL is present in "/etc/default/kdump".
+#  finally a last POST request is necessary to finish the transaction.
 #  Below, the specific format of such requests:
 #
 #  The first POST takes the following fields:
