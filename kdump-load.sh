@@ -46,6 +46,18 @@ grub_update() {
 	fi
 }
 
+#  This function is responsible for creating the kdump initrd, either
+#  via command-line call or in case initrd doesn't exist during kdump load.
+create_initrd() {
+	mkdir -p "${KDUMP_FOLDER}"
+	rm -f "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+
+	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
+	dracut --no-early-microcode --host-only -q -m\
+	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
+	--kver "$(uname -r)" "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+}
+
 if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
 	logger "kdump-steamos: /usr/share/kdump/kdump.conf is missing, aborting."
 	exit 0
@@ -61,14 +73,7 @@ echo "${KDUMP_FOLDER}" > "${KDUMP_MNT}"
 sync "${KDUMP_MNT}"
 
 if [ "$1" = "initrd" ]; then
-	mkdir -p "${KDUMP_FOLDER}"
-	rm -f "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
-
-	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
-	dracut --no-early-microcode --host-only -q -m\
-	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
-	--kver "$(uname -r)" "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
-
+	create_initrd
 	exit 0
 fi
 
@@ -115,7 +120,14 @@ KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/
 KDUMP_CMDLINE="${KDUMP_CMDLINE} panic=-1 oops=panic fsck.mode=force fsck.repair=yes nr_cpus=1 reset_devices"
 VMLINUX="$(grep -o 'BOOT_IMAGE=[^ ]*' /proc/cmdline)"
 
-if ! kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img" --append="${KDUMP_CMDLINE}"; then
+#  In case we don't have a valid initrd, for some reason, try creating
+#  one before loading kdump (or else it will fail).
+INITRD_FNAME="${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+if [ ! -s "${INITRD_FNAME}" ]; then
+	create_initrd
+fi
+
+if ! kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${INITRD_FNAME}" --append="${KDUMP_CMDLINE}"; then
 	logger "kdump-steamos: kdump load failed"
 	exit 0
 fi
