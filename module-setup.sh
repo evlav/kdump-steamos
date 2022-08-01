@@ -14,13 +14,20 @@ check() {
 }
 
 installkernel() {
-    hostonly='' instmods ext4 
+    hostonly='' instmods ext4
 }
 
 install() {
     #  Having a valid /usr/share/kdump/kdump.conf is essential for kdump.
     if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
-        return 1
+        logger "kdump-steamos: failed to create initrd, kdump.conf is missing"
+        exit 1
+    fi
+
+    # Also true for makedumpfile...
+    if [ ! -x "$(command -v makedumpfile)" ]; then
+        logger "kdump-steamos: failed to create initrd, makedumpfile is missing"
+        exit 1
     fi
 
     . /usr/share/kdump/kdump.conf
