@@ -52,10 +52,16 @@ create_initrd() {
 	mkdir -p "${KDUMP_FOLDER}"
 	rm -f "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
 
+	#  Let's prevent journal pollution due to potential xattr issues...
+	DRACUT_XATTR="${DRACUT_NO_XATTR}"
+	export DRACUT_NO_XATTR=1
+
 	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
 	dracut --no-early-microcode --host-only -q -m\
 	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
 	--kver "$(uname -r)" "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+
+	export DRACUT_NO_XATTR=${DRACUT_XATTR}
 }
 
 if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
