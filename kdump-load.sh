@@ -64,6 +64,27 @@ create_initrd() {
 	export DRACUT_NO_XATTR=${DRACUT_XATTR}
 }
 
+#  This routine performs a clean-up by deleting the old/useless remaining
+#  kdump initrd files.
+cleanup_unused_initrd() {
+	INSTALLED_KERNELS="${KDUMP_FOLDER}/.installed_kernels"
+
+	find /lib/modules/* -maxdepth 0 -type d -exec basename {} \;>"${INSTALLED_KERNELS}"
+
+	find "${KDUMP_FOLDER}"/* -name "kdump-initrd*" -type f -print0 | while IFS= read -r -d '' file
+	do
+		FNAME="$(basename "${file}" .img)"
+		KVER="${FNAME#kdump-initrd-}"
+		if ! grep -q "${KVER}" "${INSTALLED_KERNELS}" ; then
+			rm -f "${KDUMP_FOLDER}/${FNAME}.img"
+			logger "kdump-steamos: removed unused file \"${FNAME}.img\""
+		fi
+	done
+
+	rm -f "${INSTALLED_KERNELS}"
+}
+
+
 if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
 	logger "kdump-steamos: /usr/share/kdump/kdump.conf is missing, aborting."
 	exit 0
@@ -106,6 +127,7 @@ if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 		if modprobe ramoops mem_address=0x"${MEM_START}" mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
 			#  If Pstore is set, update grub.cfg to avoid reserving crashkernel memory.
 			logger "kdump-steamos: pstore-RAM was loaded successfully"
+			cleanup_unused_initrd
 			grub_update pstore
 			exit 0
 		fi
@@ -118,6 +140,7 @@ if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 		#  no point in continuing since kdump cannot work.
 fi
 
+cleanup_unused_initrd
 grub_update kdump
 
 #  Stolen from Debian kdump
