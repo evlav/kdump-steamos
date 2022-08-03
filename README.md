@@ -34,10 +34,11 @@
 #
 #  3. The logs are stored in a ZIP file at "/home/.steamos/offload/var/kdump/";
 #  if this ZIP file was successfully submitted to Valve servers, this file is
-#  then moved into the sub-folder "sent_logs/". This file is named as:
-#  "steamos-SERIAL-STEAM_USER.timestamp.zip", where SERIAL is the machine
-#  serial (from dmidecode), STEAM_USER is the Steam account name (based on the
-#  last logged Steam user) and timestamp tz is UTC.
+#  then moved into the sub-folder "sent_logs/"; if not, it's moved to the
+#  folder "not_sent_logs/".
+#  This file is named as: "steamos-SERIAL-STEAM_USER.timestamp.zip", where
+#  SERIAL is the machine serial (from dmidecode), STEAM_USER is the Steam
+#  account name (based on the last logged Steam user) and timestamp tz is UTC.
 #
 #  4. (IMPORTANT) Please, test the infrastructure in order to see if a dummy
 #  crash log is collected before using it to try debugging complex issues.
@@ -56,7 +57,7 @@
 #  usable, in order to effectively reserve crashkernel memory.
 #
 #  6. Error and succeeding messages are sent to systemd journal, so running
-#  'journalctl | grep kdump' would hopefully bring some information. Also,
+#  'journalctl -b | grep kdump' would hopefully bring some information. Also,
 #  the ZIP file collected is automatically submitted to Valve servers (unless
 #  the feature is disabled by the user); see below under DETAILS/LOG SUBMISSION
 #  for API details, decisions made, how to disable the feature, etc.
@@ -85,15 +86,9 @@
 #  unfortunately after installing the kdump-steamos package *all* initramfs
 #  images are recreated - this is not necessary, we're thinking how to prevent
 #  that, but for now be prepared: the installation take some (long) minutes only
-#  due to that...
+#  because of that...
 #
-#  (d) Unfortunately makedumpfile from Arch Linux is not available on official
-#  repos, only in AUR. But it is available on Holo, so we make use of that.
-#  Also, a discussion was started to get it included on official repos:
-#  https://lists.archlinux.org/pipermail/aur-general/2022-January/036767.html
-#  https://aur.archlinux.org/packages/makedumpfile/#comment-843853
-#
-#  (e) NVMe multipathing introduced a "randomness" level to device naming on
+#  (d) NVMe multipathing introduced a "randomness" level to device naming on
 #  Linux, so "nvme0n1" could be "nvme1n1" in some boots, if we have more than
 #  one NVMe device. There's a kernel parameter to avoid that
 #  ("nvme_core.multipath=0"). So, since we rely in getting the NVMe device name
@@ -125,10 +120,6 @@
 #  * Add a more reliable reboot mechanism - we had seen issues in the past
 #  with "reboot -f", and relying in sysrq reboot as a quirk managed to be a safe
 #  option, so this is something to think about. Should be easy to implement.
-#
-#  * Maybe a good idea would be to allow creating the minimum image for any
-#  specified kernel, not only for the running one (which is what we do now).
-#  Low-priority idea, easy to implement.
 #
 #
 #  LOG SUBMISSION
