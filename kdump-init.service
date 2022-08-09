@@ -15,4 +15,4 @@ ExecStart=/usr/lib/kdump/save-dumps.sh
 RemainAfterExit=yes
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=basic.target
