@@ -69,9 +69,10 @@ create_initrd() {
 cleanup_unused_initrd() {
 	INSTALLED_KERNELS="${MOUNT_FOLDER}/.installed_kernels"
 
-	find /lib/modules/* -maxdepth 0 -type d -exec basename {} \;>"${INSTALLED_KERNELS}"
+	find /lib/modules/* -maxdepth 0 -type d -exec basename {} \; 1> "${INSTALLED_KERNELS}"
 
-	find "${MOUNT_FOLDER}"/* -name "kdump-initrd*" -type f -print0 | while IFS= read -r -d '' file
+	find "${MOUNT_FOLDER}"/* -name "kdump-initrd*" -type f -print0 2>/dev/null |\
+	while IFS= read -r -d '' file
 	do
 		FNAME="$(basename "${file}" .img)"
 		KVER="${FNAME#kdump-initrd-}"
