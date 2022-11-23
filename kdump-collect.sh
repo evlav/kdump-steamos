@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: LGPL-2.1+
 #
 #  Copyright (c) 2021 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  Kdump script that should effectively collect the core dump/dmesg from
 #  within a Dracut-generated initramfs on SteamOS kdump.

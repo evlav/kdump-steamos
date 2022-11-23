@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: LGPL-2.1+
 #
 #  Copyright (c) 2021 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  Script that loads the panic kdump (from within a systemd service) and/or
 #  configures the Pstore-RAM mechanism. If the proper parameters are passed

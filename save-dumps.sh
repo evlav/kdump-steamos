@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: LGPL-2.1+
 #
 #  Copyright (c) 2021 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  This is the SteamOS kdump/pstore log collector and submitter; this script
 #  prepares the pstore/kdump collected data and submit it to the services that

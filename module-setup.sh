@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: LGPL-2.1+
 #
 #  Copyright (c) 2021 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  SteamOS kdump module construction/inclusion script for
 #  Dracut-based initramfs.
