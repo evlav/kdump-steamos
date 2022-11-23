@@ -20,5 +20,4 @@ install: all
 	install -D -m0644 README.md $(DESTDIR)$(dracutmodulesdir)/55kdump/README
 	install -D -m0755 kdump-load.sh $(DESTDIR)$(libdir)/kdump/kdump-load.sh
 	install -D -m0755 submit-report.sh $(DESTDIR)$(libdir)/kdump/submit-report.sh
-	install -D -m0755 submitter-load.sh $(DESTDIR)$(libdir)/kdump/submitter-load.sh
 	install -D -m0644 kdump.conf $(DESTDIR)$(sharedir)/kdump/kdump.conf
