@@ -23,7 +23,7 @@
 #  1. Install the package with pacman if not available in your image; to check
 #  if it's already installed look the pacman installed package list. Also, be
 #  sure the systemd service was properly loaded by checking
-#  'systemctl status kdump-steamos.service'.
+#  'systemctl status kdump-init.service'.
 #
 #  2. In a crash event, the dmesg log is collected, and by default this happens
 #  via the Pstore mechanism, i.e., no extra memory should be reserved and no

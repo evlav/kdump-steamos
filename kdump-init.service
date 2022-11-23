@@ -10,7 +10,7 @@ Description=SteamOS kdump loader boot-time service
 Type=oneshot
 StandardOutput=journal
 ExecStartPre=/usr/lib/kdump/kdump-load.sh
-ExecStart=/usr/lib/kdump/submit-report.sh
+ExecStart=/usr/lib/kdump/save-dumps.sh
 RemainAfterExit=yes
 
 [Install]
