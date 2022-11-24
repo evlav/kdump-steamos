@@ -5,11 +5,12 @@
 #  Copyright (c) 2021 Valve.
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
-#  Kdump script that should effectively collect the core dump/dmesg from
-#  within a Dracut-generated initramfs on SteamOS kdump.
-#  The most fail-prone operations are guarded with conditionals to bail
-#  in case we indeed fail - worst thing here would be to have a bad condition
-#  and get stuck in this minimal initramfs with no output for the user.
+#  Script for effectively collecting the core dump/dmesg from
+#  within a minimal initrd - part of kdump/pstore tooling.
+#  The most fail-prone operations are guarded with conditionals to
+#  bail in case we indeed fail - worst thing here would be to have
+#  a bad condition and get stuck in this minimal initrd with no
+#  output for the user.
 #
 
 . /usr/lib/kdump/kdump.conf

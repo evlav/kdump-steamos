@@ -5,7 +5,7 @@
 #
 
 [Unit]
-Description=SteamOS kdump loader boot-time service
+Description=pstore/kdump loader boot-time service
 
 [Service]
 Type=oneshot

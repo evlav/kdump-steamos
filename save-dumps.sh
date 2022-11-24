@@ -5,15 +5,14 @@
 #  Copyright (c) 2021 Valve.
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
-#  This is the SteamOS kdump/pstore log collector; this script prepares the
-#  pstore/kdump collected data and save it in the local disk, in the next
-#  successful boot.
+#  This is the kdump/pstore log collector; this script prepares the
+#  collected data and save it in the local disk, in the next successful boot.
 #
 
 #  We do some validation to be sure KDUMP_MNT pointed path is valid...
 #  That and having a valid /usr/share/kdump/kdump.conf are essential conditions.
 if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
-	logger "kdump-steamos: /usr/share/kdump/kdump.conf is missing, aborting."
+	logger "kdump: /usr/share/kdump/kdump.conf is missing, aborting."
 	exit 0
 fi
 
@@ -23,7 +22,7 @@ KDUMP_MAIN_FOLDER="$(cat "${KDUMP_MNT}")"
 rm -f "${KDUMP_MNT}"
 
 if [ ! -d "${KDUMP_MAIN_FOLDER}" ]; then
-	logger "kdump-steamos: invalid folder (${KDUMP_MAIN_FOLDER}) - aborting..."
+	logger "kdump: invalid folder (${KDUMP_MAIN_FOLDER}) - aborting..."
 	exit 0
 fi
 
@@ -130,9 +129,10 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 
 	sync "${LOG_FNAME}" 2>/dev/null
 	if [ ! -s "${LOG_FNAME}" ]; then
-		logger "kdump-steamos: couldn't create the log archive, aborting..."
+		logger "kdump: couldn't create the compressed log archive"
+		logger "kdump: check folder \"${KDUMP_TMP_FOLDER}\" for logs"
 	else
-		logger "kdump-steamos: logs saved locally (check ${KDUMP_LOGS_FOLDER})"
+		logger "kdump: logs saved in \"${KDUMP_LOGS_FOLDER}\""
 	fi
 fi
 

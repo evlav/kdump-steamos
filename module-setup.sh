@@ -5,7 +5,7 @@
 #  Copyright (c) 2021 Valve.
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
-#  SteamOS kdump module construction/inclusion script for
+#  Kdump-initrd module construction/inclusion script for
 #  Dracut-based initramfs.
 #
 
@@ -21,13 +21,13 @@ installkernel() {
 install() {
     #  Having a valid /usr/share/kdump/kdump.conf is essential for kdump.
     if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
-        logger "kdump-steamos: failed to create initrd, kdump.conf is missing"
+        logger "kdump: failed to create initrd, kdump.conf is missing"
         exit 1
     fi
 
     # Also true for makedumpfile...
     if [ ! -x "$(command -v makedumpfile)" ]; then
-        logger "kdump-steamos: failed to create initrd, makedumpfile is missing"
+        logger "kdump: failed to create initrd, makedumpfile is missing"
         exit 1
     fi
 
