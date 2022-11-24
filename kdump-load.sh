@@ -78,13 +78,21 @@ cleanup_unused_initrd() {
 	rm -f "${INSTALLED_KERNELS}"
 }
 
+#  Load the necessary external variables, otherwise it'll fail later.
+HAVE_CFG_FILES=0
+shopt -s nullglob
+for cfg in "/usr/share/kdump.d"/*; do
+	if [ -f "$cfg" ]; then
+		. "$cfg"
+		HAVE_CFG_FILES=1
+	fi
+done
+shopt -u nullglob
 
-if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
-	logger "kdump: /usr/share/kdump/kdump.conf is missing, aborting."
-	exit 0
+if [ ${HAVE_CFG_FILES} -eq 0 ]; then
+	logger "kdump: no config files in /usr/share/kdump.d/ - aborting."
+	exit 1
 fi
-
-. /usr/share/kdump/kdump.conf
 
 #  Find the proper mount point expected for kdump collection:
 DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"

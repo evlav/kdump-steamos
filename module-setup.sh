@@ -19,19 +19,11 @@ installkernel() {
 }
 
 install() {
-    #  Having a valid /usr/share/kdump/kdump.conf is essential for kdump.
-    if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
-        logger "kdump: failed to create initrd, kdump.conf is missing"
-        exit 1
-    fi
-
-    # Also true for makedumpfile...
+    # A valid makedumpfile is essential for the kdump initrd creation.
     if [ ! -x "$(command -v makedumpfile)" ]; then
         logger "kdump: failed to create initrd, makedumpfile is missing"
         exit 1
     fi
-
-    . /usr/share/kdump/kdump.conf
 
     #  First clear all unnecessary firmwares/drivers added by drm in order to
     #  reduce the size of this minimal initramfs being created. This should
@@ -45,7 +37,25 @@ install() {
     inst sync
     inst makedumpfile
 
-    mkdir -p "$initdir"/usr/lib/kdump
+    mkdir -p "$initdir"/usr/lib/kdump/conf
+
+    #  Load the necessary external variables, otherwise it'll fail later.
+    HAVE_CFG_FILES=0
+    shopt -s nullglob
+    for cfg in "/usr/share/kdump.d"/*; do
+        if [ -f "$cfg" ]; then
+            . "$cfg"
+            HAVE_CFG_FILES=1
+        fi
+    done
+    shopt -u nullglob
+
+    if [ ${HAVE_CFG_FILES} -eq 0 ]; then
+        logger "kdump: no config files in /usr/share/kdump.d/ - aborting."
+        exit 1
+    fi
+
+    cp -LR --preserve=all "/usr/share/kdump.d"/* "$initdir"/usr/lib/kdump/conf/
 
     #  Determine the numerical devnode for kdump, and save it on initrd;
     #  notice that partset link is not available that early in boot time.
@@ -53,7 +63,6 @@ install() {
     echo "${DEVN}" > "$initdir"/usr/lib/kdump/kdump.devnode
 
     cp -LR --preserve=all /usr/lib/kdump/* "$initdir"/usr/lib/kdump/
-    cp -LR --preserve=all /usr/share/kdump/kdump.conf "$initdir"/usr/lib/kdump/kdump.conf
 
     inst_hook pre-mount 01 "$moddir/kdump-collect.sh"
 }

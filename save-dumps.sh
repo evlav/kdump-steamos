@@ -9,14 +9,21 @@
 #  collected data and save it in the local disk, in the next successful boot.
 #
 
-#  We do some validation to be sure KDUMP_MNT pointed path is valid...
-#  That and having a valid /usr/share/kdump/kdump.conf are essential conditions.
-if [ ! -s "/usr/share/kdump/kdump.conf" ]; then
-	logger "kdump: /usr/share/kdump/kdump.conf is missing, aborting."
-	exit 0
-fi
+#  Load the necessary external variables, otherwise it'll fail later.
+HAVE_CFG_FILES=0
+shopt -s nullglob
+for cfg in "/usr/share/kdump.d"/*; do
+	if [ -f "$cfg" ]; then
+		. "$cfg"
+		HAVE_CFG_FILES=1
+	fi
+done
+shopt -u nullglob
 
-. /usr/share/kdump/kdump.conf
+if [ ${HAVE_CFG_FILES} -eq 0 ]; then
+	logger "kdump: no config files in /usr/share/kdump.d/ - aborting."
+	exit 1
+fi
 
 KDUMP_MAIN_FOLDER="$(cat "${KDUMP_MNT}")"
 rm -f "${KDUMP_MNT}"

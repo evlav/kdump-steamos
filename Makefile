@@ -20,4 +20,4 @@ install: all
 	install -D -m0644 README.md $(DESTDIR)$(dracutmodulesdir)/55kdump/README
 	install -D -m0755 kdump-load.sh $(DESTDIR)$(libdir)/kdump/kdump-load.sh
 	install -D -m0755 save-dumps.sh $(DESTDIR)$(libdir)/kdump/save-dumps.sh
-	install -D -m0644 kdump.conf $(DESTDIR)$(sharedir)/kdump/kdump.conf
+	install -D -m0644 00-default.conf $(DESTDIR)$(sharedir)/kdump.d/00-default

@@ -13,7 +13,13 @@
 #  output for the user.
 #
 
-. /usr/lib/kdump/kdump.conf
+#  We have a more controlled situation with regards the config
+#  files here, since we manually added them in the initrd and
+#  the validation also happened there, during such addition,
+#  hence not requiring checking here.
+for cfg in "/usr/lib/kdump/conf/"/*; do
+	. "$cfg"
+done
 
 VMCORE="/proc/vmcore"
 KDUMP_TIMESTAMP=$(date -u +"%Y%m%d%H%M")
