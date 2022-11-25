@@ -25,20 +25,6 @@ install() {
         exit 1
     fi
 
-    #  First clear all unnecessary firmwares/drivers added by drm in order to
-    #  reduce the size of this minimal initramfs being created. This should
-    #  be already done via command-line arguments, but let's play safe and delete
-    #  from here as well just in case.
-    rm -rf "$initdir"/usr/lib/firmware/amdgpu/
-    rm -rf "$initdir"/usr/lib/modules/*/kernel/drivers/gpu/drm/amd/*
-
-    #  Install necessary binaries
-    inst date
-    inst sync
-    inst makedumpfile
-
-    mkdir -p "$initdir"/usr/lib/kdump/conf
-
     #  Load the necessary external variables, otherwise it'll fail later.
     HAVE_CFG_FILES=0
     shopt -s nullglob
@@ -55,7 +41,20 @@ install() {
         exit 1
     fi
 
-    cp -LR --preserve=all "/usr/share/kdump.d"/* "$initdir"/usr/lib/kdump/conf/
+    #  First clear all unnecessary firmwares/drivers added by drm in order to
+    #  reduce the size of this minimal initramfs being created. This should
+    #  be already done via command-line arguments, but let's play safe and delete
+    #  from here as well just in case.
+    rm -rf "$initdir"/usr/lib/firmware/amdgpu/
+    rm -rf "$initdir"/usr/lib/modules/*/kernel/drivers/gpu/drm/amd/*
+
+    #  Install necessary binaries
+    inst date
+    inst sync
+    inst makedumpfile
+
+    mkdir -p "$initdir"/usr/share/kdump.d/
+    cp -LR --preserve=all /usr/share/kdump.d/* "$initdir"/usr/share/kdump.d/
 
     #  Determine the numerical devnode for kdump, and save it on initrd;
     #  notice that partset link is not available that early in boot time.

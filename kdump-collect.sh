@@ -16,8 +16,8 @@
 #  We have a more controlled situation with regards the config
 #  files here, since we manually added them in the initrd and
 #  the validation also happened there, during such addition,
-#  hence not requiring checking here.
-for cfg in "/usr/lib/kdump/conf/"/*; do
+#  hence not requiring checks here.
+for cfg in "/usr/share/kdump.d"/*; do
 	. "$cfg"
 done
 
