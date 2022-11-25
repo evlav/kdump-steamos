@@ -34,7 +34,7 @@ grub_update() {
 
 			logger "kdump: kexec cannot work, no reserved memory in this boot..."
 			logger "kdump: but we automatically set crashkernel for next boot."
-			exit 0
+			exit 0 #  this is considered a successful run
 		fi
 
 		if [ "$1" = "pstore" ] && [ "${CRASHK}" -ne 0 ]; then
@@ -166,6 +166,6 @@ fi
 
 if ! kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${INITRD_FNAME}" --append="${KDUMP_CMDLINE}"; then
 	logger "kdump: kexec load failed"
-	exit 0
+	exit 1
 fi
 logger "kdump: panic kexec loaded successfully"

@@ -30,7 +30,7 @@ rm -f "${KDUMP_MNT}"
 
 if [ ! -d "${KDUMP_MAIN_FOLDER}" ]; then
 	logger "kdump: invalid folder (${KDUMP_MAIN_FOLDER}) - aborting..."
-	exit 0
+	exit 1
 fi
 
 LOGS_FOUND=0
