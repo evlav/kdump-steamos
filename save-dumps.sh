@@ -25,16 +25,16 @@ if [ ${HAVE_CFG_FILES} -eq 0 ]; then
 	exit 1
 fi
 
-KDUMP_MAIN_FOLDER="$(cat "${KDUMP_MNT}")"
-rm -f "${KDUMP_MNT}"
+MAIN_FOLDER="$(cat "${MNT_TMP}")"
+rm -f "${MNT_TMP}"
 
-if [ ! -d "${KDUMP_MAIN_FOLDER}" ]; then
-	logger "kdump: invalid folder (${KDUMP_MAIN_FOLDER}) - aborting..."
+if [ ! -d "${MAIN_FOLDER}" ]; then
+	logger "kdump: invalid folder (${MAIN_FOLDER}) - aborting..."
 	exit 1
 fi
 
 LOGS_FOUND=0
-KDUMP_TMP_FOLDER="${KDUMP_MAIN_FOLDER}/.tmp"
+KDUMP_TMP_FOLDER="${MAIN_FOLDER}/.tmp"
 
 # Use UTC timezone to match kdump collection
 CURRENT_TSTAMP=$(date -u +"%Y%m%d%H%M")
@@ -67,7 +67,7 @@ if [ "${PSTORE_CNT}" -ne 0 ]; then
 fi
 
 #  Now, we proceed the same way if there are kdump data.
-KDUMP_CRASH_FOLDER="${KDUMP_MAIN_FOLDER}/crash"
+KDUMP_CRASH_FOLDER="${MAIN_FOLDER}/crash"
 
 KDUMP_CNT=$(find "${KDUMP_CRASH_FOLDER}"/* -type d 2>/dev/null | wc -l)
 if [ "${KDUMP_CNT}" -ne 0 ]; then
@@ -112,10 +112,10 @@ fi
 
 
 # If we have pstore and/or kdump logs, let's process them...
-KDUMP_LOGS_FOLDER="${KDUMP_MAIN_FOLDER}/logs"
+LOGS_FOLDER="${MAIN_FOLDER}/logs"
 
 if [ ${LOGS_FOUND} -ne 0 ]; then
-	mkdir -p "${KDUMP_LOGS_FOLDER}"
+	mkdir -p "${LOGS_FOLDER}"
 
 	#  First  we collect some more info, like DMI data, os-release, etc;
 	DMI_FNAME="${KDUMP_TMP_FOLDER}/dmidecode.${CURRENT_TSTAMP}"
@@ -131,7 +131,7 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 
 	#  Create the dump compressed pack.
 	LOG_FNAME="kdump-${CURRENT_TSTAMP}.zip"
-	LOG_FNAME="${KDUMP_LOGS_FOLDER}/${LOG_FNAME}"
+	LOG_FNAME="${LOGS_FOLDER}/${LOG_FNAME}"
 	zip -9 -jq "${LOG_FNAME}" "${KDUMP_TMP_FOLDER}"/* 1>/dev/null
 
 	sync "${LOG_FNAME}" 2>/dev/null
@@ -139,7 +139,7 @@ if [ ${LOGS_FOUND} -ne 0 ]; then
 		logger "kdump: couldn't create the compressed log archive"
 		logger "kdump: check folder \"${KDUMP_TMP_FOLDER}\" for logs"
 	else
-		logger "kdump: logs saved in \"${KDUMP_LOGS_FOLDER}\""
+		logger "kdump: logs saved in \"${LOGS_FOLDER}\""
 	fi
 fi
 

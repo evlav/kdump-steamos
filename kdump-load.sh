@@ -9,40 +9,46 @@
 #  configures the Pstore-RAM mechanism. If the proper parameters are passed
 #  also, either it creates the minimal kdump initramfs for the running kernel
 #  or removes all the previously created ones. Since it runs on boot time,
-#  avoid failing here to not risk a boot hang.
+#  extra care is required to avoid boot hangs.
 #
 
 #  This function has 2 purposes: if 'kdump' is passed as argument and we don't
 #  have crashkernel memory reserved, we edit grub config file and recreate
-#  grub.cfg, so next boot has it reserved; in this case, we also  bail-out,
+#  grub.cfg, so next boot has it reserved; in this case, we also bail-out,
 #  since kdump can't be loaded anyway.
 #
 #  If 'pstore' is passsed as argument, we try to unset crashkernel iff it's
 #  already set AND the pattern in grub config is the one added by us - if the
 #  users set crashkernel themselves, we don't mess with that.
 grub_update() {
-	GRUBCFG="/etc/default/grub"
 	CRASHK="$(cat /sys/kernel/kexec_crash_size)"
-	SED_ADD="s/^GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"crashkernel=192M crash_kexec_post_notifiers /g"
+	SED_ADD="s/^GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"${GRUB_CMDLINE}/g"
 
 	if [ "${GRUB_AUTOSET}" -eq 1 ]; then
 		if [ "$1" = "kdump" ] && [ "${CRASHK}" -eq 0 ]; then
-			sed -i "${SED_ADD}" "${GRUBCFG}"
-			update-grub 1>/dev/null
-			sync "/boot/grub/grub.cfg" 2>/dev/null
-			sync "/efi/EFI/steamos/grub.cfg" 2>/dev/null
+			sed -i "${SED_ADD}" "${GRUB_CFG_FILE}"
 
-			logger "kdump: kexec cannot work, no reserved memory in this boot..."
+			if ! grub-mkconfig -o "${GRUB_BOOT_FILE}" 1>/dev/null; then
+				logger "kdump: failed to execute command \"${GRUB_CMD}\""
+				exit 1
+			fi
+			sync "${GRUB_BOOT_FILE}" 2>/dev/null
+
+			logger "kdump: kexec won't succeed, no reserved memory in this boot..."
 			logger "kdump: but we automatically set crashkernel for next boot."
 			exit 0 #  this is considered a successful run
 		fi
 
 		if [ "$1" = "pstore" ] && [ "${CRASHK}" -ne 0 ]; then
-			sed -i "s/\"crashkernel=192M crash_kexec_post_notifiers /\"/g" "${GRUBCFG}"
-			update-grub 1>/dev/null
-			sync "/boot/grub/grub.cfg" 2>/dev/null
-			sync "/efi/EFI/steamos/grub.cfg" 2>/dev/null
-			logger "kdump: clearing crashkernel memory previously set..."
+			sed -i "s/\"${GRUB_CMDLINE}/\"/g" "${GRUB_CFG_FILE}"
+
+			if ! grub-mkconfig -o "${GRUB_BOOT_FILE}" 1>/dev/null; then
+				logger "kdump: failed to execute command \"${GRUB_CMD}\""
+				exit 1
+			fi
+			sync "${GRUB_BOOT_FILE}" 2>/dev/null
+
+			logger "kdump: cleared crashkernel memory previously set."
 		fi
 	fi
 }
@@ -50,27 +56,27 @@ grub_update() {
 #  This function is responsible for creating the kdump initrd, either
 #  via command-line call or in case initrd doesn't exist during kdump load.
 create_initrd() {
-	rm -f "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+	rm -f "${MOUNT_FOLDER}/kdump-initrd-$(uname -r).img"
 
 	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
 	DRACUT_NO_XATTR=1 dracut --no-early-microcode --host-only -q -m\
 	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
-	--kver "$(uname -r)" "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+	--kver "$(uname -r)" "${MOUNT_FOLDER}/kdump-initrd-$(uname -r).img"
 }
 
 #  This routine performs a clean-up by deleting the old/useless remaining
 #  kdump initrd files.
 cleanup_unused_initrd() {
-	INSTALLED_KERNELS="${KDUMP_FOLDER}/.installed_kernels"
+	INSTALLED_KERNELS="${MOUNT_FOLDER}/.installed_kernels"
 
 	find /lib/modules/* -maxdepth 0 -type d -exec basename {} \;>"${INSTALLED_KERNELS}"
 
-	find "${KDUMP_FOLDER}"/* -name "kdump-initrd*" -type f -print0 | while IFS= read -r -d '' file
+	find "${MOUNT_FOLDER}"/* -name "kdump-initrd*" -type f -print0 | while IFS= read -r -d '' file
 	do
 		FNAME="$(basename "${file}" .img)"
 		KVER="${FNAME#kdump-initrd-}"
 		if ! grep -q "${KVER}" "${INSTALLED_KERNELS}" ; then
-			rm -f "${KDUMP_FOLDER}/${FNAME}.img"
+			rm -f "${MOUNT_FOLDER}/${FNAME}.img"
 			logger "kdump: removed unused file \"${FNAME}.img\""
 		fi
 	done
@@ -97,42 +103,42 @@ fi
 #  Find the proper mount point expected for kdump collection:
 DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"
 
-#  Create the kdump folder here, as soon as possible, given the
-#  importance of such directory in all kdump/pstore steps.
-KDUMP_FOLDER="${DEVN_MOUNTED}/${KDUMP_FOLDER}"
-mkdir -p "${KDUMP_FOLDER}"
+#  Create the kdump main folder here, as soon as possible, given
+#  the importance of such directory in all kdump/pstore steps.
+MOUNT_FOLDER="${DEVN_MOUNTED}/${MOUNT_FOLDER}"
+mkdir -p "${MOUNT_FOLDER}"
 
-echo "${KDUMP_FOLDER}" > "${KDUMP_MNT}"
-sync "${KDUMP_MNT}"
+echo "${MOUNT_FOLDER}" > "${MNT_TMP}"
+sync "${MNT_TMP}"
 
 #  Notice that at this point it's required to have the full
-#  KDUMP_FOLDER, so this must remain after the DEVNODE operations above.
+#  MOUNT_FOLDER, so this must remain after the DEVNODE operations above.
 if [ "$1" = "initrd" ]; then
 	create_initrd
 	exit 0
 fi
 
 if [ "$1" = "clear" ]; then
-	rm -f "${KDUMP_FOLDER}"/kdump-initrd-*
+	rm -f "${MOUNT_FOLDER}"/kdump-initrd-*
 	exit 0
 fi
 
-#  Pstore-RAM load; if it is configured via /usr/share/kdump/kdump.conf and fails
+#  Pstore-RAM load; if it is configured via the config files and fails
 #  to configure pstore, we still try to load the kdump. We try to reserve
-#  here a 5MiB memory region.
-#  Notice that we assume ramoops is a module here - if built-in, we should
-#  properly load it through command-line parameters.
+#  here a ${MEM_REQUIRED} memory region.
+#  Notice that we assume ramoops is a module here - if built-in, users
+#  should properly load it through command-line parameters.
 if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
-	MEM_REQUIRED=5242880  # 5MiB
-	RECORD_SIZE=0x200000  # 2MiB
+	MEM_REQUIRED="${PSTORE_MEM_AMOUNT}"
+	RECORD_SIZE="${PSTORE_RECORD_SZ}"
 	RANGE=$(grep "RAM buffer" /proc/iomem | head -n1 | cut -f1 -d\ )
 
 	MEM_END=$(echo "$RANGE" | cut -f2 -d-)
 	MEM_START=$(echo "$RANGE" | cut -f1 -d-)
 	MEM_SIZE=$(( 16#${MEM_END} - 16#${MEM_START} ))
 
-	if [ ${MEM_SIZE} -ge ${MEM_REQUIRED} ]; then
-		if modprobe ramoops mem_address=0x"${MEM_START}" mem_size=${MEM_REQUIRED} record_size=${RECORD_SIZE}; then
+	if [ ${MEM_SIZE} -ge "${MEM_REQUIRED}" ]; then
+		if modprobe ramoops mem_address=0x"${MEM_START}" mem_size="${MEM_REQUIRED}" record_size="${RECORD_SIZE}"; then
 			#  If Pstore is set, update grub.cfg to avoid reserving crashkernel memory.
 			logger "kdump: pstore-RAM was loaded successfully"
 			cleanup_unused_initrd
@@ -159,7 +165,7 @@ VMLINUX="$(grep -o 'BOOT_IMAGE=[^ ]*' /proc/cmdline)"
 
 #  In case we don't have a valid initrd, for some reason, try creating
 #  one before loading kdump (or else it will fail).
-INITRD_FNAME="${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
+INITRD_FNAME="${MOUNT_FOLDER}/kdump-initrd-$(uname -r).img"
 if [ ! -s "${INITRD_FNAME}" ]; then
 	create_initrd
 fi

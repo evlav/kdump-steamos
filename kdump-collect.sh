@@ -23,7 +23,7 @@ done
 
 VMCORE="/proc/vmcore"
 KDUMP_TIMESTAMP=$(date -u +"%Y%m%d%H%M")
-KDUMP_FOLDER="/kdump_path/${KDUMP_FOLDER}/crash/${KDUMP_TIMESTAMP}"
+KDUMP_FOLDER="/kdump_path/${MOUNT_FOLDER}/crash/${KDUMP_TIMESTAMP}"
 
 #  Bail out in case we don't have a vmcore, i.e. either we're not kdumping
 #  or something is pretty wrong and we wouldn't be able to progress.
