@@ -1,18 +1,3 @@
-#!/bin/bash
-set -uo pipefail
-#
-#  SPDX-License-Identifier: LGPL-2.1+
-#
-#  Copyright (c) 2021 Valve.
-#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
-#
-#  Script that loads the panic kdump (from within a systemd service) and/or
-#  configures the Pstore-RAM mechanism. If the proper parameters are passed
-#  also, either it creates the minimal kdump initramfs for the running kernel
-#  or removes all the previously created ones. Since it runs on boot time,
-#  extra care is required to avoid boot hangs.
-#
-
 #  This function has 2 purposes: if 'kdump' is passed as argument and we don't
 #  have crashkernel memory reserved, we edit grub config file and recreate
 #  grub.cfg, so next boot has it reserved; in this case, we also bail-out,
@@ -86,21 +71,7 @@ cleanup_unused_initrd() {
 	rm -f "${INSTALLED_KERNELS}"
 }
 
-#  Load the necessary external variables, otherwise it'll fail later.
-HAVE_CFG_FILES=0
-shopt -s nullglob
-for cfg in "/usr/share/kdump.d"/*; do
-	if [ -f "$cfg" ]; then
-		. "$cfg"
-		HAVE_CFG_FILES=1
-	fi
-done
-shopt -u nullglob
-
-if [ ${HAVE_CFG_FILES} -eq 0 ]; then
-	logger "kdump: no config files in /usr/share/kdump.d/ - aborting."
-	exit 1
-fi
+load_kdump_config
 
 #  Find the proper mount point expected for kdump collection:
 DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"

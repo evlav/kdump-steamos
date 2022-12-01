@@ -10,7 +10,16 @@ sysctldir := $(shell pkg-config --define-variable=prefix=$(prefix) --variable=sy
 dracutmodulesdir := $(shell pkg-config --define-variable=prefix=$(prefix) --variable=dracutmodulesdir dracut 2>/dev/null \
 			  || echo $(libdir)/dracut/modules.d/)
 
-all:
+kdump-load.sh: kdump-load.header common.sh kdump-load.sh.in
+	cat $^ > $@
+
+module-setup.sh: module-setup.header common.sh module-setup.sh.in
+	cat $^ > $@
+
+save-dumps.sh: save-dumps.header common.sh save-dumps.sh.in
+	cat $^ > $@
+
+all: kdump-load.sh module-setup.sh save-dumps.sh
 
 install: all
 	install -D -m0644 kdump-init.service $(DESTDIR)$(systemdunitsdir)/kdump-init.service

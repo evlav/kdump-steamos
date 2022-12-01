@@ -1,0 +1,14 @@
+#!/bin/bash
+set -uo pipefail
+#
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  Copyright (c) 2021 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
+#
+#  Script that loads the panic kdump (from within a systemd service) and/or
+#  configures the Pstore-RAM mechanism. If the proper parameters are passed
+#  also, either it creates the minimal kdump initramfs for the running kernel
+#  or removes all the previously created ones. Since it runs on boot time,
+#  extra care is required to avoid boot hangs.
+#

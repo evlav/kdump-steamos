@@ -1,30 +1,4 @@
-#!/bin/bash
-set -uo pipefail
-#
-#  SPDX-License-Identifier: LGPL-2.1+
-#
-#  Copyright (c) 2021 Valve.
-#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
-#
-#  This is the kdump/pstore log collector; this script prepares the
-#  collected data and save it in the local disk, in the next successful boot.
-#
-
-#  Load the necessary external variables, otherwise it'll fail later.
-HAVE_CFG_FILES=0
-shopt -s nullglob
-for cfg in "/usr/share/kdump.d"/*; do
-	if [ -f "$cfg" ]; then
-		. "$cfg"
-		HAVE_CFG_FILES=1
-	fi
-done
-shopt -u nullglob
-
-if [ ${HAVE_CFG_FILES} -eq 0 ]; then
-	logger "kdump: no config files in /usr/share/kdump.d/ - aborting."
-	exit 1
-fi
+load_kdump_config
 
 MAIN_FOLDER="$(cat "${MNT_TMP}")"
 rm -f "${MNT_TMP}"
