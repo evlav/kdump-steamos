@@ -159,10 +159,11 @@ fi
 cleanup_unused_initrd
 grub_update kdump
 
-#  Stolen from Debian kdump
+#  After some consideration, we've stolen the kdump parameters from
+#  Debian/Ubuntu implementation, it makes sense for us.
 KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/\\\\"/' /proc/cmdline)
-
 KDUMP_CMDLINE="${KDUMP_CMDLINE} panic=-1 oops=panic fsck.mode=force fsck.repair=yes nr_cpus=1 reset_devices"
+
 VMLINUX="$(grep -o 'BOOT_IMAGE=[^ ]*' /proc/cmdline)"
 
 #  In case we don't have a valid initrd, for some reason, try creating
