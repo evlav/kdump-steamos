@@ -88,7 +88,11 @@ fi
 
 #  Find the proper mount point for /home:
 DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"
+
+#  Create the kdump folder here, as soon as possible, given the
+#  importance of such directory in all kdump/pstore steps.
 KDUMP_FOLDER="${DEVN_MOUNTED}/${KDUMP_FOLDER}"
+mkdir -p "${KDUMP_FOLDER}"
 
 echo "${KDUMP_FOLDER}" > "${KDUMP_MNT}"
 sync "${KDUMP_MNT}"
