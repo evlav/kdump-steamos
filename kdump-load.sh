@@ -50,7 +50,6 @@ grub_update() {
 #  This function is responsible for creating the kdump initrd, either
 #  via command-line call or in case initrd doesn't exist during kdump load.
 create_initrd() {
-	mkdir -p "${KDUMP_FOLDER}"
 	rm -f "${KDUMP_FOLDER}/kdump-initrd-$(uname -r).img"
 
 	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
@@ -87,7 +86,7 @@ fi
 
 . /usr/share/kdump/kdump.conf
 
-#  Find the proper mount point for /home:
+#  Find the proper mount point expected for kdump collection:
 DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"
 
 #  Create the kdump folder here, as soon as possible, given the
@@ -98,6 +97,8 @@ mkdir -p "${KDUMP_FOLDER}"
 echo "${KDUMP_FOLDER}" > "${KDUMP_MNT}"
 sync "${KDUMP_MNT}"
 
+#  Notice that at this point it's required to have the full
+#  KDUMP_FOLDER, so this must remain after the DEVNODE operations above.
 if [ "$1" = "initrd" ]; then
 	create_initrd
 	exit 0
