@@ -24,12 +24,14 @@ if [ "${PSTORE_CNT}" -ne 0 ]; then
 
 	LOOP_CNT=0
 	while [ "${PSTORE_CNT}" -gt 0 ]; do
-		PSTORE_FILE="$(find /sys/fs/pstore/* | grep ramoops | sort | head -n1)"
+		PSTORE_FILE="$(find /sys/fs/pstore/* | grep dmesg-ramoops | sort | head -n1)"
 		SAVED_FILE="${PSTORE_FOLDER}/dmesg-pstore.${CURRENT_TSTAMP}-${LOOP_CNT}"
 
-		cat "${PSTORE_FILE}" > "${SAVED_FILE}"
-		sync "${SAVED_FILE}"
-		rm -f "${PSTORE_FILE}"
+		if [ -e "${PSTORE_FILE}" ]; then
+			cat "${PSTORE_FILE}" > "${SAVED_FILE}"
+			sync "${SAVED_FILE}"
+			rm -f "${PSTORE_FILE}"
+		fi
 
 		PSTORE_CNT=$((PSTORE_CNT - 1))
 		LOOP_CNT=$((LOOP_CNT + 1))
