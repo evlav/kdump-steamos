@@ -1,0 +1,43 @@
+load_kdump_config
+
+#  General comment of a caveat here: INITRD_installation() must be
+#  reentrant and only install the INITRD handlers if they're not
+#  already installed. This is necessary due to a kinda chicken-egg
+#  problem: the first time initramfs creation is attempted, we did't
+#  necessarily run the INITRD package installation hooks yet, hence
+#  we may be unable to properly create the initramfs image. "Easy"
+#  solution is to just try to install them always, it's cheap and not
+#  dependent of package install time magic.
+
+#  Parameter passing case - since this is invoked by the kdump-load
+#  script, we must be sure that the INITRD package is available.
+if [ -n "$1" ]; then
+
+	if command -v INITRD 1>/dev/null; then
+		INITRD_installation
+		create_initramfs_INITRD "$1"
+	fi
+	exit 0
+fi
+
+while read -r line; do
+	#  First case is the INITRD package installation.
+	if [[ "$line" != */vmlinuz ]]; then
+		INITRD_installation
+		exit 0
+	fi
+
+	#  If reaching this point, we're installing/removing the kernel image.
+	VERSION="$(basename "$(dirname "$line")")"
+
+	#  If the file exists, means it's an installation step;
+	#  notice that alpm suppresses the leading '/'.
+	if [ -f /"$line" ]; then
+		INITRD_installation
+		create_initramfs_INITRD "$VERSION"
+	else
+		rm -f "${MOUNT_FOLDER}"/kdump-initrd-"$VERSION".img
+
+	fi
+	exit 0
+done

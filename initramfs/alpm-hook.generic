@@ -1,0 +1,27 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  Copyright (c) 2022 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
+#
+#  alpm hook to deal with the kdump initramfs creation/deletion
+#  for INITRD users. This hook would act upon kernel installation,
+#  upgrade and removal, also on INITRD package installation.
+#
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Remove
+Operation = Upgrade
+Target = usr/lib/modules/*/vmlinuz
+
+[Trigger]
+Type = Package
+Operation = Install
+Target = INITRD
+
+[Action]
+Description = Managing kdump minimal initramfs and INITRD hooks...
+Depends=INITRD
+When = PostTransaction
+Exec = /usr/lib/kdump/kdump-INITRD-hook.sh
+NeedsTargets

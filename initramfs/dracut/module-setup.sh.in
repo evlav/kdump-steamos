@@ -10,7 +10,7 @@ installkernel() {
 	#  to reduce the size of the minimal initramfs being created - kdump
 	#  is an non-graphical environment. This should have been already done
 	#  via dracut cmdline arguments, but play safe and delete here as well.
-	#  Our list include the most common FWs/drivers (amd, i915, nvidia)
+	#  Our list includes the most common FWs/drivers (amd, i915, nvidia).
 	rm -rf "$initdir"/usr/lib/firmware/{amdgpu,i915,nvidia,radeon}
 	rm -rf "$initdir"/usr/lib/modules/*/kernel/drivers/gpu/drm/{amd,i915,nouveau,radeon}
 
@@ -20,12 +20,25 @@ installkernel() {
 		exit 1
 	fi
 
-	hostonly='' instmods "${FSMOD}"
+	instmods "${FSMOD}"
+
+	#  We try here to be comprehensive and include the most common
+	#  block modules to allow mounting the target device - notice
+	#  that since we use hostonly, only the ones that make sense would
+	#  get added, hence this list won't bloat the minimal image!
+	instmods aacraid
+	instmods ahci
+	instmods hpsa
+	instmods megaraid_sas
+	instmods mpt3sas
+	instmods nvme
+	instmods virtio_blk
+	instmods virtio-scsi
 }
 
 install() {
 	# A valid makedumpfile is essential for the kdump initrd creation.
-	if [ ! -x "$(command -v makedumpfile)" ]; then
+	if ! command -v makedumpfile 1>/dev/null; then
 		logger "kdump: failed to create dracut initrd, makedumpfile is missing"
 		exit 1
 	fi

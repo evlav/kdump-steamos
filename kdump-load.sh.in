@@ -41,17 +41,15 @@ grub_update() {
 
 #  This function is responsible for creating the kdump initrd, either
 #  via command-line call or in case initrd doesn't exist during kdump load.
+#  It accounts for both mkinitcpio and dracut users.
 create_initrd() {
-	rm -f "${MOUNT_FOLDER}/kdump-initrd-$(uname -r).img"
-
-	echo "Creating the kdump initramfs for kernel \"$(uname -r)\" ..."
-	DRACUT_NO_XATTR=1 dracut --no-early-microcode --host-only -q -m\
-	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
-	--kver "$(uname -r)" "${MOUNT_FOLDER}/kdump-initrd-$(uname -r).img"
+	/usr/lib/kdump/kdump-mkinitcpio-hook.sh "$(uname -r)"
+	/usr/lib/kdump/kdump-dracut-hook.sh "$(uname -r)"
 }
 
 #  This routine performs a clean-up by deleting the old/useless remaining
-#  kdump initrd files.
+#  kdump initrd files. Even with alpm-hooks, users might install kernels
+#  manually so it makes sense to have this fallback to avoid storage waste.
 cleanup_unused_initrd() {
 	INSTALLED_KERNELS="${MOUNT_FOLDER}/.installed_kernels"
 

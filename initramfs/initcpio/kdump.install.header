@@ -1,0 +1,9 @@
+#!/bin/bash
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  Copyright (c) 2022 Valve.
+#  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
+#
+#  Kdump-initrd module construction/inclusion script for
+#  initcpio-based initramfs.
+#

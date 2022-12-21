@@ -1,0 +1,51 @@
+build() {
+    load_kdump_config
+
+    # A valid makedumpfile is essential for the kdump initrd creation.
+    if ! command -v makedumpfile 1>/dev/null; then
+        logger "kdump: failed to create minimal initrd, makedumpfile is missing"
+        exit 1
+    fi
+
+    add_binary /usr/bin/date
+    add_binary /usr/bin/sync
+    add_binary "$(command -v makedumpfile)"
+
+    #  Copying kdump config/lib files is essential for a functional kdump.
+    add_full_dir /usr/share/kdump.d/
+    add_full_dir /usr/lib/kdump/
+
+    #  We need to derive the proper place to save the dump from the
+    #  config files, in a way that makes possible to mount it in early boot.
+    DEVNODE="$(findmnt -n -o SOURCE --target "${MOUNT_FOLDER}")"
+    if [ -z "${DEVNODE}" ]; then
+        logger "kdump: error on devnode discovery"
+        exit 1
+    fi
+    echo "${DEVNODE}" > "${BUILDROOT}"/usr/lib/kdump/kdump.mnt
+
+    TGT="$(findmnt -n -o TARGET --target "${MOUNT_FOLDER}")"
+    if [ -z "${TGT}" ]; then
+        logger "kdump: error on base folder discovery"
+        exit 1
+    fi
+
+    BASE_FLD="${MOUNT_FOLDER#*$TGT}"
+    echo "${BASE_FLD}" > "${BUILDROOT}"/usr/lib/kdump/kdump.dir
+
+    #  Finally, we shouldn't have DRM/GPU drivers and firmwares here,
+    #  but...just in case, let's remove all of that nevertheless.
+    #  Our list includes the most common FWs/drivers (amd, i915, nvidia).
+    rm -rf "${BUILDROOT}"/usr/lib/firmware/{amdgpu,i915,nvidia,radeon}
+    rm -rf "${BUILDROOT}"/usr/lib/modules/*/kernel/drivers/gpu/drm/{amd,i915,nouveau,radeon}
+
+    add_runscript
+}
+
+help() {
+    cat <<HELPEOF
+This hook is responsible for creating the minimal kdump initramfs.
+HELPEOF
+}
+
+# vim: set ft=sh ts=4 sw=4 et:
