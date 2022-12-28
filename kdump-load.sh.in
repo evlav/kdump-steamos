@@ -71,21 +71,60 @@ cleanup_unused_initrd() {
 	rm -f "${INSTALLED_KERNELS}"
 }
 
-load_kdump_config
-
-#  In case the kdump main folder doesn't exist, create it
-#  here, as soon as possible.
-mkdir -p "${MOUNT_FOLDER}"
-
-if [ "$1" = "initrd" ]; then
-	create_initrd
-	exit 0
-fi
-
-if [ "$1" = "clear" ]; then
+#  Now this routine performs a full deletion of all kdump initrd files.
+clear_all_initrds() {
 	rm -f "${MOUNT_FOLDER}"/kdump-initrd-*
-	exit 0
-fi
+}
+
+#  Function to display basic help about how to use this tool.
+usage() {
+    cat <<EOF
+${0##*/} <COMMAND>
+Kdump/Pstore loader.
+
+Options:
+    load
+                        Load pstore/kdump according to the configuration file.
+
+    create-initrd
+                        Create the minimal kdump initrd for the running kernel.
+
+    clear-initrd
+                        Delete all kdump minimal initrd images.
+EOF
+}
+
+preamble() {
+	load_kdump_config
+
+	#  In case the kdump main folder doesn't exist, create it
+	#  here, as soon as possible.
+	mkdir -p "${MOUNT_FOLDER}"
+}
+
+#  Entry point of the script.
+case $1 in
+	clear-initrd)
+		preamble
+		clear_all_initrds
+		exit 0
+		;;
+	create-initrd)
+		preamble
+		create_initrd
+		exit 0
+		;;
+	load)
+		#  just bail from the case statement, jumping to code below
+		;;
+	*)
+		usage
+		exit 1
+		;;
+esac
+
+#  Here starts the main purpose of this script, the load operation.
+preamble
 
 #  Pstore-RAM load; if it is configured via the config files and fails
 #  to configure pstore, we still try to load the kdump. We try to reserve

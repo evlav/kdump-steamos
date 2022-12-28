@@ -10,7 +10,7 @@ Description=pstore/kdump loader boot-time service
 [Service]
 Type=oneshot
 StandardOutput=journal
-ExecStartPre=/usr/lib/kdump/kdump-load.sh
+ExecStartPre=/usr/lib/kdump/kdump-load.sh load
 ExecStart=/usr/lib/kdump/save-dumps.sh
 RemainAfterExit=yes
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -uo pipefail
+set -o pipefail  #  Didn't set -u on purpose, since users could pass empty $1
 #
 #  SPDX-License-Identifier: LGPL-2.1+
 #
