@@ -73,19 +73,10 @@ cleanup_unused_initrd() {
 
 load_kdump_config
 
-#  Find the proper mount point expected for kdump collection:
-DEVN_MOUNTED="$(findmnt "${MOUNT_DEVNODE}" -fno TARGET)"
-
-#  Create the kdump main folder here, as soon as possible, given
-#  the importance of such directory in all kdump/pstore steps.
-MOUNT_FOLDER="${DEVN_MOUNTED}/${MOUNT_FOLDER}"
+#  In case the kdump main folder doesn't exist, create it
+#  here, as soon as possible.
 mkdir -p "${MOUNT_FOLDER}"
 
-echo "${MOUNT_FOLDER}" > "${MNT_TMP}"
-sync "${MNT_TMP}"
-
-#  Notice that at this point it's required to have the full
-#  MOUNT_FOLDER, so this must remain after the DEVNODE operations above.
 if [ "$1" = "initrd" ]; then
 	create_initrd
 	exit 0

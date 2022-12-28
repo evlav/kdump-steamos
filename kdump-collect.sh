@@ -13,6 +13,13 @@
 #  output for the user.
 #
 
+#  Bail out in case we don't have a vmcore, i.e. either we're not kdumping
+#  or something is pretty wrong and we wouldn't be able to progress.
+VMCORE="/proc/vmcore"
+if [ ! -f $VMCORE ]; then
+	reboot -f
+fi
+
 #  We have a more controlled situation with regards the config
 #  files here, since we manually added them in the initrd and
 #  the validation also happened there, during such addition,
@@ -21,21 +28,13 @@ for cfg in "/usr/share/kdump.d"/*; do
 	. "$cfg"
 done
 
-VMCORE="/proc/vmcore"
 KDUMP_TIMESTAMP=$(date -u +"%Y%m%d%H%M")
-KDUMP_FOLDER="/kdump_path/${MOUNT_FOLDER}/crash/${KDUMP_TIMESTAMP}"
+MOUNT_POINT="$(cat /usr/lib/kdump/kdump.mnt)"
+BASE_FOLDER="$(cat /usr/lib/kdump/kdump.dir)"
+KDUMP_FOLDER="/kdump_path/${BASE_FOLDER}/crash/${KDUMP_TIMESTAMP}"
 
-#  Bail out in case we don't have a vmcore, i.e. either we're not kdumping
-#  or something is pretty wrong and we wouldn't be able to progress.
-#
-if [ ! -f $VMCORE ]; then
-	reboot -f
-fi
-
-DEVN="$(cat /usr/lib/kdump/kdump.devnode)"
 mkdir -p "/kdump_path"
-
-if ! mount "${DEVN}" /kdump_path; then
+if ! mount "${MOUNT_POINT}" /kdump_path; then
 	reboot -f
 fi
 
@@ -52,7 +51,7 @@ if [ "${FULL_COREDUMP}" -ne 0 ]; then
 	sync "${KDUMP_FOLDER}/vmcore.compressed"
 fi
 
-umount "${DEVN}"
+umount "${MOUNT_POINT}"
 sync
 
 reboot -f

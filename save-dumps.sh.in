@@ -1,7 +1,6 @@
 load_kdump_config
 
-MAIN_FOLDER="$(cat "${MNT_TMP}")"
-rm -f "${MNT_TMP}"
+MAIN_FOLDER="${MOUNT_FOLDER}"
 
 if [ ! -d "${MAIN_FOLDER}" ]; then
 	logger "kdump: invalid folder (${MAIN_FOLDER}) - aborting..."
