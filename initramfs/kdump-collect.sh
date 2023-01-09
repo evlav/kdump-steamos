@@ -35,6 +35,11 @@
     BASE_FOLDER="$(cat /usr/lib/kdump/kdump.dir)"
     KDUMP_FOLDER="/kdump_path/${BASE_FOLDER}/crash/${KDUMP_TIMESTAMP}"
 
+    #  Check if the device node exists - or else, just bails-out.
+    if [ ! -e "${MOUNT_POINT}" ]; then
+        reboot -f
+    fi
+
     mkdir -p "/kdump_path"
     if ! mount "${MOUNT_POINT}" /kdump_path; then
         reboot -f
