@@ -182,7 +182,18 @@ grub_update kdump
 KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/\\\\"/' /proc/cmdline)
 KDUMP_CMDLINE="${KDUMP_CMDLINE} panic=-1 oops=panic fsck.mode=force fsck.repair=yes nr_cpus=1 reset_devices"
 
+#  To obtain the vmlinux binary path, try first using directly the command-line
+#  information. If it fails, then attempt prepending /boot into that (faced
+#  both situations in the field so far).
 VMLINUX="$(grep -o 'BOOT_IMAGE=[^ ]*' /proc/cmdline)"
+VMLINUX="${VMLINUX#*BOOT_IMAGE=}"
+if [ ! -s "${VMLINUX}" ]; then
+	VMLINUX="/boot/${VMLINUX}"
+	if [ ! -s "${VMLINUX}" ]; then
+		logger "kdump: couldn't find the kernel image"
+		exit 1
+	fi
+fi
 
 #  In case we don't have a valid initrd, for some reason, try creating
 #  one before loading kdump (or else it will fail).
@@ -191,7 +202,7 @@ if [ ! -s "${INITRD_FNAME}" ]; then
 	create_initrd
 fi
 
-if ! kexec -s -p "${VMLINUX#*BOOT_IMAGE=}" --initrd "${INITRD_FNAME}" --append="${KDUMP_CMDLINE}"; then
+if ! kexec -s -p "${VMLINUX}" --initrd "${INITRD_FNAME}" --append="${KDUMP_CMDLINE}"; then
 	logger "kdump: kexec load failed"
 	exit 1
 fi
