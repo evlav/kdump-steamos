@@ -8,7 +8,16 @@
 create_initramfs_dracut() {
 	rm -f "${MOUNT_FOLDER}/kdump-initrd-$1.img"
 
-	DRACUT_NO_XATTR=1 dracut --no-early-microcode --host-only -q -m\
+	COMPRESS="--compress=gzip"
+	MAJOR="$(echo "$1" | cut -f1 -d\.)"
+	MINOR="$(echo "$1" | cut -f2 -d\.)"
+
+	#  Zstd is FAST, but only supported in kernels 5.9+.
+	if [ "${MAJOR}" -gt 5 ] || ([ "${MAJOR}" -eq 5 ] && [ "${MINOR}" -ge 9 ]); then
+		COMPRESS="--compress=zstd"
+	fi
+
+	DRACUT_NO_XATTR=1 dracut "${COMPRESS}" --no-early-microcode --host-only -q -m\
 	"bash systemd systemd-initrd systemd-sysusers modsign dbus-daemon kdump dbus udev-rules dracut-systemd base fs-lib shutdown"\
 	--kver "$1" "${MOUNT_FOLDER}/kdump-initrd-$1.img"
 
