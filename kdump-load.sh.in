@@ -177,10 +177,11 @@ fi
 cleanup_unused_initrd
 grub_update kdump
 
-#  After some consideration, we've stolen the kdump parameters from
-#  Debian/Ubuntu implementation, it makes sense for us.
+#  The kdump kernel command-line has some parameters appended, check
+#  the configuration files in order to change that. We also remove huge
+#  pages settings here (and crashkernel reservation), to save memory on kdump.
 KDUMP_CMDLINE=$(sed -re 's/(^| )(crashkernel|hugepages|hugepagesz)=[^ ]*//g;s/"/\\\\"/' /proc/cmdline)
-KDUMP_CMDLINE="${KDUMP_CMDLINE} panic=-1 oops=panic fsck.mode=force fsck.repair=yes nr_cpus=1 reset_devices"
+KDUMP_CMDLINE="${KDUMP_CMDLINE} ${KDUMP_APPEND_CMDLINE}"
 
 #  To obtain the vmlinux binary path, try first using directly the command-line
 #  information. If it fails, then attempt prepending /boot into that (faced
