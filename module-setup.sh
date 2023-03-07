@@ -15,6 +15,7 @@ check() {
 
 installkernel() {
     hostonly='' instmods ext4
+    hostonly='' instmods nvme
 }
 
 install() {
