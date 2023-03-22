@@ -1,9 +1,9 @@
 build() {
-    load_kdump_config
+    load_kdumpst_config
 
     # A valid makedumpfile is essential for the kdump initrd creation.
     if ! command -v makedumpfile 1>/dev/null; then
-        logger "kdump: failed to create minimal initrd, makedumpfile is missing"
+        logger "kdumpst: failed to create minimal initrd, makedumpfile is missing"
         exit 1
     fi
 
@@ -12,26 +12,26 @@ build() {
     add_binary "$(command -v makedumpfile)"
 
     #  Copying kdump config/lib files is essential for a functional kdump.
-    add_full_dir /usr/share/kdump.d/
-    add_full_dir /usr/lib/kdump/
+    add_full_dir /usr/share/kdumpst.d/
+    add_full_dir /usr/lib/kdumpst/
 
     #  We need to derive the proper place to save the dump from the
     #  config files, in a way that makes possible to mount it in early boot.
     DEVNODE="$(findmnt -n -o SOURCE --target "${MOUNT_FOLDER}")"
     if [ -z "${DEVNODE}" ]; then
-        logger "kdump: error on devnode discovery"
+        logger "kdumpst: error on devnode discovery"
         exit 1
     fi
-    echo "${DEVNODE}" > "${BUILDROOT}"/usr/lib/kdump/kdump.mnt
+    echo "${DEVNODE}" > "${BUILDROOT}"/usr/lib/kdumpst/kdump.mnt
 
     TGT="$(findmnt -n -o TARGET --target "${MOUNT_FOLDER}")"
     if [ -z "${TGT}" ]; then
-        logger "kdump: error on base folder discovery"
+        logger "kdumpst: error on base folder discovery"
         exit 1
     fi
 
     BASE_FLD="${MOUNT_FOLDER#*$TGT}"
-    echo "${BASE_FLD}" > "${BUILDROOT}"/usr/lib/kdump/kdump.dir
+    echo "${BASE_FLD}" > "${BUILDROOT}"/usr/lib/kdumpst/kdump.dir
 
     #  Finally, we shouldn't have DRM/GPU drivers and firmwares here,
     #  but...just in case, let's remove all of that nevertheless.
@@ -44,7 +44,7 @@ build() {
 
 help() {
     cat <<HELPEOF
-This hook is responsible for creating the minimal kdump initramfs.
+Hook responsible for creating the kdumpst minimal kdump initramfs.
 HELPEOF
 }
 

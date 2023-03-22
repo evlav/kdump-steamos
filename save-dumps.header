@@ -6,6 +6,7 @@ set -uo pipefail
 #  Copyright (c) 2021 Valve.
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
-#  This is the kdump/pstore log collector; this script prepares the
-#  collected data and save it in the local disk, in the next successful boot.
+#  This is the kdumpst log collector; this script prepares the
+#  collected data and save it in the local disk, in the first
+#  successful boot after the panic.
 #

@@ -5,13 +5,13 @@
 #
 
 [Unit]
-Description=pstore/kdump loader boot-time service
+Description=kdumpst loader boot-time service
 
 [Service]
 Type=oneshot
 StandardOutput=journal
-ExecStartPre=/usr/lib/kdump/kdump-load.sh load
-ExecStart=/usr/lib/kdump/save-dumps.sh
+ExecStartPre=/usr/lib/kdumpst/kdumpst-load.sh load
+ExecStart=/usr/lib/kdumpst/save-dumps.sh
 RemainAfterExit=yes
 
 [Install]

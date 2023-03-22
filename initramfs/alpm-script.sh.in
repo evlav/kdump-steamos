@@ -1,4 +1,4 @@
-load_kdump_config
+load_kdumpst_config
 
 #  General comment of a caveat here: INITRD_installation() must be
 #  reentrant and only install the INITRD handlers if they're not

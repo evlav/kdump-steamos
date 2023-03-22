@@ -5,5 +5,5 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  Kdump-initrd module construction/inclusion script for
-#  initcpio-based initramfs.
+#  initcpio-based initramfs - part of the kdumpst tooling.
 #

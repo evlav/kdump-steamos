@@ -23,5 +23,5 @@ Target = INITRD
 Description = Managing kdump minimal initramfs and INITRD hooks...
 Depends=INITRD
 When = PostTransaction
-Exec = /usr/lib/kdump/kdump-INITRD-hook.sh
+Exec = /usr/lib/kdumpst/kdump-INITRD-hook.sh
 NeedsTargets

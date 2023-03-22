@@ -10,7 +10,7 @@ sysctldir := $(shell pkg-config --define-variable=prefix=$(prefix) --variable=sy
 			  || echo $(libdir)/sysctl.d/)
 alpmhooksdir := $(shell echo $(sharedir)/libalpm/hooks/)
 
-kdump-load.sh: kdump-load.header common.sh kdump-load.sh.in
+kdumpst-load.sh: kdumpst-load.header common.sh kdumpst-load.sh.in
 	cat $^ > $@
 
 save-dumps.sh: save-dumps.header common.sh save-dumps.sh.in
@@ -53,28 +53,28 @@ kdump.install: initramfs/initcpio/kdump.install.header common.sh initramfs/initc
 .PHONY: mkinitcpio
 mkinitcpio: 99-kdump-mkinitcpio.hook 99-kdump-mkinitcpio-git.hook kdump-mkinitcpio-hook.sh kdump.hook kdump.install
 
-all: kdump-load.sh save-dumps.sh dracut mkinitcpio
+all: kdumpst-load.sh save-dumps.sh dracut mkinitcpio
 
 install: all
-	install -D -m0644 kdump-init.service $(DESTDIR)$(systemdunitsdir)/kdump-init.service
+	install -D -m0644 kdumpst-init.service $(DESTDIR)$(systemdunitsdir)/kdumpst-init.service
 	install -D -m0644 20-panic-sysctls.conf $(DESTDIR)$(sysctldir)/20-panic-sysctls.conf
-	install -D -m0644 README.md $(DESTDIR)$(libdir)/kdump/README.md
-	install -D -m0755 kdump-load.sh $(DESTDIR)$(libdir)/kdump/kdump-load.sh
-	install -D -m0755 save-dumps.sh $(DESTDIR)$(libdir)/kdump/save-dumps.sh
-	install -D -m0644 00-default.conf $(DESTDIR)$(sharedir)/kdump.d/00-default
+	install -D -m0644 README.md $(DESTDIR)$(libdir)/kdumpst/README.md
+	install -D -m0755 kdumpst-load.sh $(DESTDIR)$(libdir)/kdumpst/kdumpst-load.sh
+	install -D -m0755 save-dumps.sh $(DESTDIR)$(libdir)/kdumpst/save-dumps.sh
+	install -D -m0644 00-default.conf $(DESTDIR)$(sharedir)/kdumpst.d/00-default
 	install -D -m0644 initramfs/99-kdump-dracut.hook $(DESTDIR)$(alpmhooksdir)/99-kdump-dracut.hook
 	install -D -m0644 initramfs/99-kdump-mkinitcpio.hook $(DESTDIR)$(alpmhooksdir)/99-kdump-mkinitcpio.hook
 	install -D -m0644 initramfs/99-kdump-mkinitcpio-git.hook $(DESTDIR)$(alpmhooksdir)/99-kdump-mkinitcpio-git.hook
-	install -D -m0755 initramfs/dracut/kdump-dracut-hook.sh $(DESTDIR)$(libdir)/kdump/kdump-dracut-hook.sh
-	install -D -m0755 initramfs/kdump-collect.sh $(DESTDIR)$(libdir)/kdump/dracut/kdump-collect.sh
-	install -D -m0755 initramfs/dracut/module-setup.sh $(DESTDIR)$(libdir)/kdump/dracut/module-setup.sh
-	install -D -m0755 initramfs/initcpio/kdump-mkinitcpio-hook.sh $(DESTDIR)$(libdir)/kdump/kdump-mkinitcpio-hook.sh
-	install -D -m0755 initramfs/initcpio/kdump-mkinitcpio-hook.sh $(DESTDIR)$(libdir)/kdump/kdump-mkinitcpio-git-hook.sh
-	install -D -m0644 initramfs/initcpio/kdump.hook $(DESTDIR)$(libdir)/kdump/initcpio/kdump.hook
-	install -D -m0644 initramfs/initcpio/kdump.install $(DESTDIR)$(libdir)/kdump/initcpio/kdump.install
+	install -D -m0755 initramfs/dracut/kdump-dracut-hook.sh $(DESTDIR)$(libdir)/kdumpst/kdump-dracut-hook.sh
+	install -D -m0755 initramfs/kdump-collect.sh $(DESTDIR)$(libdir)/kdumpst/dracut/kdump-collect.sh
+	install -D -m0755 initramfs/dracut/module-setup.sh $(DESTDIR)$(libdir)/kdumpst/dracut/module-setup.sh
+	install -D -m0755 initramfs/initcpio/kdump-mkinitcpio-hook.sh $(DESTDIR)$(libdir)/kdumpst/kdump-mkinitcpio-hook.sh
+	install -D -m0755 initramfs/initcpio/kdump-mkinitcpio-hook.sh $(DESTDIR)$(libdir)/kdumpst/kdump-mkinitcpio-git-hook.sh
+	install -D -m0644 initramfs/initcpio/kdump.hook $(DESTDIR)$(libdir)/kdumpst/initcpio/kdump.hook
+	install -D -m0644 initramfs/initcpio/kdump.install $(DESTDIR)$(libdir)/kdumpst/initcpio/kdump.install
 
 clean:
-	rm -f kdump-load.sh save-dumps.sh
+	rm -f kdumpst-load.sh save-dumps.sh
 	rm -f initramfs/99-kdump-*
 	rm -f initramfs/dracut/{kdump-dracut-hook.sh,module-setup.sh}
 	rm -f initramfs/initcpio/kdump{-mkinitcpio-hook.sh,.hook,.install}

@@ -6,7 +6,7 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  Script for effectively collecting the core dump/dmesg from
-#  within a minimal initrd - part of the kdump/pstore tooling.
+#  within a minimal initrd - part of the kdumpst tooling.
 #  The most fail-prone operations are guarded with conditionals to
 #  bail in case we indeed fail - worst thing here would be to have
 #  a bad condition and get stuck in this minimal initrd with no
@@ -26,13 +26,13 @@
     #  files here, since we manually added them in the initrd and
     #  the validation also happened there, during such addition,
     #  hence not requiring checks here.
-    for cfg in "/usr/share/kdump.d"/*; do
+    for cfg in "/usr/share/kdumpst.d"/*; do
 	. "$cfg"
     done
 
     KDUMP_TIMESTAMP=$(date -u +"%Y%m%d%H%M")
-    MOUNT_POINT="$(cat /usr/lib/kdump/kdump.mnt)"
-    BASE_FOLDER="$(cat /usr/lib/kdump/kdump.dir)"
+    MOUNT_POINT="$(cat /usr/lib/kdumpst/kdump.mnt)"
+    BASE_FOLDER="$(cat /usr/lib/kdumpst/kdump.dir)"
     KDUMP_FOLDER="/kdump_path/${BASE_FOLDER}/crash/${KDUMP_TIMESTAMP}"
 
     #  Check if the device node exists - or else, just bails-out.

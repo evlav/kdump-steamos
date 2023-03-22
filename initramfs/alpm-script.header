@@ -7,7 +7,7 @@ set -eo pipefail #  exclude -u on purpose to avoid issues with param checking
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  This is the generic alpm-hook script that handles kernel/package
-#  installation for INITRD users, on behalf of kdump. Covers both manual
+#  installation for INITRD users, on behalf of kdumpst. Covers both manual
 #  invocation (to create the initramfs image for a given kernel) as
 #  well as kernel package installation/removal trigger. It also handles
 #  the event of installing the package INITRD, which requires the

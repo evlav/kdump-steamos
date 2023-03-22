@@ -6,5 +6,5 @@
 #  Maintainer: Guilherme G. Piccoli <gpiccoli@igalia.com>
 #
 #  Kdump-initrd module construction/inclusion script for
-#  Dracut-based initramfs.
+#  Dracut-based initramfs - part of the kdumpst tooling.
 #

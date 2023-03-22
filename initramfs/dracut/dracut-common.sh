@@ -2,7 +2,7 @@
 #  the initramfs for dracut users, but also with regards to
 #  installing dracut specific hooks/scripts.
 #
-#  IMPORTANT: it is assumed that kdump configuration was loaded
+#  IMPORTANT: it is assumed that kdumpst configuration was loaded
 #  before running any of these functions!
 #
 create_initramfs_dracut() {
@@ -22,12 +22,12 @@ create_initramfs_dracut() {
 	--kver "$1" "${MOUNT_FOLDER}/kdump-initrd-$1.img"
 
 	if [ -s "${MOUNT_FOLDER}/kdump-initrd-$1.img" ]; then
-		logger "kdump: created dracut minimal initramfs"
+		logger "kdumpst: created dracut minimal initramfs"
 	fi
 }
 
 dracut_installation() {
-	HOOKS_DIR="/usr/lib/kdump/dracut/"
+	HOOKS_DIR="/usr/lib/kdumpst/dracut/"
 
 	DRACUT_DIR="$(pkg-config --variable=dracutmodulesdir dracut 2>/dev/null)"
 	if [ -z "${DRACUT_DIR}" ]; then
@@ -37,7 +37,7 @@ dracut_installation() {
 	if [ ! -d "${DRACUT_DIR}"/55kdump/ ]; then
 		install -D -m0755 "${HOOKS_DIR}"/kdump-collect.sh "${DRACUT_DIR}"/55kdump/kdump-collect.sh
 		install -D -m0755 "${HOOKS_DIR}"/module-setup.sh "${DRACUT_DIR}"/55kdump/module-setup.sh
-		logger "kdump: dracut hooks/scripts installed"
+		logger "kdumpst: dracut hooks/scripts installed"
 	fi
 }
 

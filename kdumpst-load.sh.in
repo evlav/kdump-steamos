@@ -15,13 +15,13 @@ grub_update() {
 			sed -i "${SED_ADD}" "${GRUB_CFG_FILE}"
 
 			if ! grub-mkconfig -o "${GRUB_BOOT_FILE}" 1>/dev/null; then
-				logger "kdump: failed to execute command \"${GRUB_CMD}\""
+				logger "kdumpst: failed to execute command \"${GRUB_CMD}\""
 				exit 1
 			fi
 			sync "${GRUB_BOOT_FILE}" 2>/dev/null
 
-			logger "kdump: kexec won't succeed, no reserved memory in this boot..."
-			logger "kdump: but we automatically set crashkernel for next boot."
+			logger "kdumpst: kexec won't succeed, no reserved memory in this boot..."
+			logger "kdumpst: but we automatically set crashkernel for next boot."
 			exit 0 #  this is considered a successful run
 		fi
 
@@ -29,12 +29,12 @@ grub_update() {
 			sed -i "s/\"${GRUB_CMDLINE}/\"/g" "${GRUB_CFG_FILE}"
 
 			if ! grub-mkconfig -o "${GRUB_BOOT_FILE}" 1>/dev/null; then
-				logger "kdump: failed to execute command \"${GRUB_CMD}\""
+				logger "kdumpst: failed to execute command \"${GRUB_CMD}\""
 				exit 1
 			fi
 			sync "${GRUB_BOOT_FILE}" 2>/dev/null
 
-			logger "kdump: cleared crashkernel memory previously set."
+			logger "kdumpst: cleared crashkernel memory previously set."
 		fi
 	fi
 }
@@ -43,8 +43,8 @@ grub_update() {
 #  via command-line call or in case initrd doesn't exist during kdump load.
 #  It accounts for both mkinitcpio and dracut users.
 create_initrd() {
-	/usr/lib/kdump/kdump-mkinitcpio-hook.sh "$(uname -r)"
-	/usr/lib/kdump/kdump-dracut-hook.sh "$(uname -r)"
+	/usr/lib/kdumpst/kdump-mkinitcpio-hook.sh "$(uname -r)"
+	/usr/lib/kdumpst/kdump-dracut-hook.sh "$(uname -r)"
 }
 
 #  This routine performs a clean-up by deleting the old/useless remaining
@@ -62,7 +62,7 @@ cleanup_unused_initrd() {
 		KVER="${FNAME#kdump-initrd-}"
 		if ! grep -q "${KVER}" "${INSTALLED_KERNELS}" ; then
 			rm -f "${MOUNT_FOLDER}/${FNAME}.img"
-			logger "kdump: removed unused file \"${FNAME}.img\""
+			logger "kdumpst: removed unused file \"${FNAME}.img\""
 		fi
 	done
 
@@ -99,7 +99,7 @@ parse_ram_buffers() {
 usage() {
     cat <<EOF
 ${0##*/} <COMMAND>
-Kdump/Pstore loader.
+kdumpst loader.
 
 Options:
     load
@@ -114,9 +114,9 @@ EOF
 }
 
 preamble() {
-	load_kdump_config
+	load_kdumpst_config
 
-	#  In case the kdump main folder doesn't exist, create it
+	#  In case the kdumpst main folder doesn't exist, create it
 	#  here, as soon as possible.
 	mkdir -p "${MOUNT_FOLDER}"
 }
@@ -160,12 +160,12 @@ if [ "${USE_PSTORE_RAM}" -eq 1 ]; then
 	if [ "${MEM_SIZE}" -gt 0 ]; then
 		if modprobe ramoops mem_address=0x"${MEM_START}" mem_size="${MEM_REQUIRED}" record_size="${RECORD_SIZE}"; then
 			#  If Pstore is set, update grub.cfg to avoid reserving crashkernel memory.
-			logger "kdump: pstore-RAM was loaded successfully"
+			logger "kdumpst: pstore-RAM was loaded successfully"
 			cleanup_unused_initrd
 			grub_update pstore
 			exit 0
 		fi
-		logger "kdump: pstore-RAM load failed...will try kdump"
+		logger "kdumpst: pstore-RAM load failed...will try kdump"
 	fi
 		#  Fallback to kdump load - if we fail when configuring pstore, better
 		#  trying kdump; in case we have crashkernel memory reserved, lucky us.
@@ -191,7 +191,7 @@ VMLINUX="${VMLINUX#*BOOT_IMAGE=}"
 if [ ! -s "${VMLINUX}" ]; then
 	VMLINUX="/boot/${VMLINUX}"
 	if [ ! -s "${VMLINUX}" ]; then
-		logger "kdump: couldn't find the kernel image"
+		logger "kdumpst: couldn't find the kernel image"
 		exit 1
 	fi
 fi
@@ -204,7 +204,7 @@ if [ ! -s "${INITRD_FNAME}" ]; then
 fi
 
 if ! kexec -s -p "${VMLINUX}" --initrd "${INITRD_FNAME}" --append="${KDUMP_CMDLINE}"; then
-	logger "kdump: kexec load failed"
+	logger "kdumpst: kexec load failed"
 	exit 1
 fi
-logger "kdump: panic kexec loaded successfully"
+logger "kdumpst: panic kexec loaded successfully"
